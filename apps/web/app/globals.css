@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,11 +6,11 @@
 
 :root {
   /* Surfaces */
-  --mh-bg: #0B0E14;
-  --mh-navy: #10141D;
-  --mh-card: #161B26;
-  --mh-card-hover: #1E2535;
-  --mh-border: #232B3B;
+  --mh-bg: #05070B;
+  --mh-navy: #0B0F17;
+  --mh-card: #101522;
+  --mh-card-hover: #171E30;
+  --mh-border: #1E273D;
 
   /* Official Palette: Maroon, Energy Crimson, Solar Gold, Steel Cyan */
   --mh-maroon: #8B1E2D; /* rgb(139, 30, 45) */
@@ -38,12 +38,17 @@ body {
   color: var(--mh-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  background-image: 
+    radial-gradient(ellipse at 80% 20%, rgba(230, 57, 70, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(139, 30, 45, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(69, 123, 157, 0.05) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
 /* Monad Obsidian Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #E63946 #0B0E14;
+  scrollbar-color: #E63946 #05070B;
 }
 
 ::-webkit-scrollbar {
@@ -52,16 +57,48 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0E14;
+  background: #05070B;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #232B3B;
+  background: #1E273D;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #E63946;
+}
+
+/* Tactical HUD Scanline & Grid Effect */
+.tactical-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.tactical-scanline {
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.3)
+  );
+  background-size: 100% 4px;
+}
+
+/* Angular Cyber Cuts */
+.cyber-cut {
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.cyber-cut-sm {
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.cyber-cut-btn {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 /* Signature Monad 12-deg Angled Buttons & Elements */
@@ -72,14 +109,16 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   transform: skewX(-12deg);
-  transition: all 0.15s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid var(--mh-maroon);
   background: linear-gradient(135deg, #E63946 0%, #8B1E2D 100%);
   color: #FFFFFF;
-  padding: 0.6rem 1.4rem;
-  border-radius: 4px;
+  padding: 0.65rem 1.6rem;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
 }
 
 .mh-btn > * {
@@ -87,8 +126,9 @@ body {
 }
 
 .mh-btn:hover {
-  background: linear-gradient(135deg, #FF5B69 0%, #A82020 100%);
-  box-shadow: 0 0 16px rgba(230, 57, 70, 0.5);
+  background: linear-gradient(135deg, #FF4D5B 0%, #A82020 100%);
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.6), 0 0 40px rgba(139, 30, 45, 0.3);
+  transform: skewX(-12deg) translateY(-2px);
 }
 
 .mh-btn:active {
@@ -96,26 +136,27 @@ body {
 }
 
 .mh-btn-secondary {
-  background: #161B26;
-  border-color: #232B3B;
+  background: rgba(16, 21, 34, 0.85);
+  backdrop-filter: blur(8px);
+  border-color: var(--mh-border);
   color: #FFFFFF;
 }
 
 .mh-btn-secondary:hover {
-  background: #1E2535;
+  background: #171E30;
   border-color: #457B9D;
-  box-shadow: 0 0 12px rgba(69, 123, 157, 0.3);
+  box-shadow: 0 0 16px rgba(69, 123, 157, 0.4);
 }
 
 .mh-btn-gold {
   background: linear-gradient(135deg, #F4D35E 0%, #EB7F31 100%);
   border-color: #F4D35E;
-  color: #0B0E14;
+  color: #05070B;
 }
 
 .mh-btn-gold:hover {
   background: linear-gradient(135deg, #FFE082 0%, #F4D35E 100%);
-  box-shadow: 0 0 16px rgba(244, 211, 94, 0.5);
+  box-shadow: 0 0 20px rgba(244, 211, 94, 0.6);
 }
 
 .mh-btn-live {
@@ -125,7 +166,7 @@ body {
 
 .mh-btn-live:hover {
   background: #FF4D5B;
-  box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.7);
 }
 
 .mh-badge {
@@ -148,28 +189,61 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .mh-card {
   background-color: var(--mh-card);
   border: 1px solid var(--mh-border);
   border-radius: 8px;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mh-card:hover {
-  border-color: rgba(230, 57, 70, 0.4);
+  border-color: rgba(230, 57, 70, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(230, 57, 70, 0.2);
+}
+
+/* Tactical Holographic Marker Styles */
+.hud-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  z-index: 20;
+}
+
+.hud-marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 30;
 }
 
 /* Animations */
 @keyframes pulse-live {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 0.4; transform: scale(0.92); }
 }
 
 .animate-pulse-live {
   animation: pulse-live 1.5s ease-in-out infinite;
+}
+
+@keyframes radar-ring {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.animate-radar-ring {
+  animation: radar-ring 2s cubic-bezier(0.1, 0.7, 0.1, 1) infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
 }
 
 @keyframes shake {

@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { LandingSections } from "@/components/landing/LandingSections";
-import { TrailerModal } from "@/components/landing/TrailerModal";
+import { CommandCenterDashboard } from "@/components/dashboard/CommandCenterDashboard";
 import { BeastDetailModal } from "@/components/BeastDetailModal";
 import { TerritoryMap } from "@/components/TerritoryMap";
 import { ArenaLobby } from "@/components/ArenaLobby";
@@ -17,7 +15,6 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { PlayerProfile } from "@/components/PlayerProfile";
 import { EvolutionModal } from "@/components/EvolutionModal";
 import { SpectatorMode } from "@/components/SpectatorMode";
-import { CommandCenterDashboard } from "@/components/dashboard/CommandCenterDashboard";
 import {
   MOCK_BEASTS,
   MOCK_LEADERBOARD,
@@ -37,10 +34,11 @@ import { soundFX } from "@/game/SoundFX";
 import { getWeb3Service, TxProgress, Web3Mode } from "@/lib/web3Service";
 import { CombatAction } from "@/game/BattleAction";
 
-export default function Home() {
-  const router = useRouter();
-  const [currentTab, setCurrentTab] = useState<string>("landing");
-  const [isTrailerOpen, setIsTrailerOpen] = useState<boolean>(false);
+function AppDashboardInner() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "dashboard";
+
+  const [currentTab, setCurrentTab] = useState<string>(initialTab);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(true);
   const [walletConnected, setWalletConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string>("");
@@ -82,6 +80,13 @@ export default function Home() {
   // Web3 Live Settlement Console state
   const [txProgress, setTxProgress] = useState<TxProgress | null>(null);
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      setCurrentTab(tabParam === "home" ? "dashboard" : tabParam);
+    }
+  }, [searchParams]);
 
   const activeMode: Web3Mode = isDemoMode ? "DEMO" : "REAL";
   const web3Service = getWeb3Service(activeMode);
@@ -166,11 +171,6 @@ export default function Home() {
         errorMessage: e.message,
       });
     }
-  };
-
-  const handleEnterCity = () => {
-    soundFX.playClick();
-    router.push("/app");
   };
 
   const handleStartBattle = () => {
@@ -325,17 +325,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070B] text-white flex flex-col justify-between selection:bg-[#E63946] selection:text-white">
+    <div className="min-h-screen bg-[#05070B] text-white flex flex-col justify-between">
       <div>
         {/* Navigation Bar */}
         <Navbar
-          activeTab={currentTab}
+          activeTab={currentTab === "dashboard" ? "home" : currentTab}
           onTabChange={(tab) => {
             setIsFighting(false);
             if (tab === "landing") {
-              setCurrentTab("landing");
+              window.location.href = "/";
             } else {
-              router.push(`/app?tab=${tab}`);
+              setCurrentTab(tab);
             }
           }}
           walletConnected={walletConnected}
@@ -356,13 +356,6 @@ export default function Home() {
           }}
         />
 
-        {/* Cinematic Trailer Modal */}
-        <TrailerModal
-          isOpen={isTrailerOpen}
-          onClose={() => setIsTrailerOpen(false)}
-          onEnterCity={handleEnterCity}
-        />
-
         {/* Victory / Defeat Modal */}
         {battleResultData && !isConsoleOpen && (
           <VictoryDefeatModal
@@ -378,11 +371,11 @@ export default function Home() {
             streak={battleResultData.streak}
             onClaim={() => {
               setBattleResultData(null);
-              router.push("/app?tab=map");
+              setCurrentTab("map");
             }}
             onViewLeaderboard={() => {
               setBattleResultData(null);
-              router.push("/app?tab=leaderboard");
+              setCurrentTab("leaderboard");
             }}
           />
         )}
@@ -407,40 +400,7 @@ export default function Home() {
           />
         )}
 
-        {/* ========================================================================= */}
-        {/* ROUTE 1: FULL CINEMATIC LANDING PAGE (DEFAULT FOR /)                      */}
-        {/* ========================================================================= */}
-        {currentTab === "landing" && (
-          <div className="flex flex-col">
-            <HeroSection
-              onEnterCity={handleEnterCity}
-              onWatchTrailer={() => {
-                soundFX.playClick();
-                setIsTrailerOpen(true);
-              }}
-              onSelectTerritoryZone={(zoneId) => {
-                router.push(`/app?tab=map&zone=${zoneId}`);
-              }}
-              playerBeast={playerBeast}
-              walletConnected={walletConnected}
-            />
-
-            <LandingSections
-              onEnterCity={handleEnterCity}
-              onSelectTab={(tab) => {
-                router.push(`/app?tab=${tab}`);
-              }}
-              onSelectBeast={(b) => {
-                setPlayerBeast(b);
-                router.push("/app?tab=arena");
-              }}
-            />
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* ROUTE 2: INLINE GAME APP TABS (FOR INSTANT SWITCHING)                     */}
-        {/* ========================================================================= */}
+        {/* VIEW 1: COMMAND CENTER DASHBOARD */}
         {currentTab === "dashboard" && (
           <CommandCenterDashboard
             playerBeast={playerBeast}
@@ -451,10 +411,11 @@ export default function Home() {
             onMintStarter={handleMintStarter}
             territories={territories}
             onChallengeTerritory={handleChallengeTerritory}
-            onNavigateTab={(tab) => setCurrentTab(tab)}
+            onNavigateTab={setCurrentTab}
           />
         )}
 
+        {/* VIEW 2: ARENA / BATTLE */}
         {currentTab === "arena" && (
           <div>
             {isFighting ? (
@@ -478,6 +439,7 @@ export default function Home() {
           </div>
         )}
 
+        {/* VIEW 3: MUMBAI TACTICAL MAP */}
         {currentTab === "map" && (
           <TerritoryMap
             territories={territories}
@@ -487,10 +449,12 @@ export default function Home() {
           />
         )}
 
+        {/* VIEW 4: LEADERBOARDS */}
         {currentTab === "leaderboard" && (
           <Leaderboard entries={leaderboard} userAddress={walletAddress} />
         )}
 
+        {/* VIEW 5: CREWS */}
         {currentTab === "crews" && (
           <div className="max-w-[1600px] mx-auto py-10 px-4 sm:px-8">
             <h2 className="font-display font-black text-3xl sm:text-5xl uppercase tracking-wide text-white mb-2">
@@ -530,10 +494,12 @@ export default function Home() {
           </div>
         )}
 
+        {/* VIEW 6: HUNT TV */}
         {currentTab === "tv" && (
           <SpectatorMode />
         )}
 
+        {/* VIEW 7: PROFILE */}
         {currentTab === "profile" && (
           <PlayerProfile
             profile={profile}
@@ -549,5 +515,13 @@ export default function Home() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function AppPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#05070B] flex items-center justify-center font-mono text-[#E63946]">LOADING CITY LEAGUE...</div>}>
+      <AppDashboardInner />
+    </Suspense>
   );
 }
