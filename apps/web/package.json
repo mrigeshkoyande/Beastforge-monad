@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "keep-alive": "node scripts/keep-alive.js",
+    "keep-alive:prod": "node scripts/keep-alive.js $NEXT_PUBLIC_SITE_URL",
+    "dev:full": "concurrently --names \"NEXT,ALIVE\" --prefix-colors \"cyan,yellow\" \"next dev\" \"node scripts/keep-alive.js\""
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",
