@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { AchievementItem } from "@/game/EvolutionSystem";
-import { soundFX } from "@/game/SoundFX";
 import {
   Trophy,
   Swords,
@@ -10,7 +9,6 @@ import {
   MapPin,
   Crown,
   Lock,
-  CheckCircle2,
   ExternalLink,
   Sparkles,
 } from "lucide-react";
@@ -22,12 +20,11 @@ interface AchievementsShowcaseProps {
 
 export const AchievementsShowcase: React.FC<AchievementsShowcaseProps> = ({
   achievements,
-  onClaimOnChain,
 }) => {
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   const renderIcon = (iconName: string, unlocked: boolean) => {
-    const className = `w-6 h-6 ${unlocked ? "text-arcade-black" : "text-arcade-black/40"}`;
+    const className = `w-6 h-6 ${unlocked ? "text-[#F4D35E]" : "text-[#64748B]"}`;
     switch (iconName) {
       case "Trophy":
         return <Trophy className={className} />;
@@ -49,24 +46,24 @@ export const AchievementsShowcase: React.FC<AchievementsShowcaseProps> = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-arcade-purple text-white rounded-lg border-2 border-arcade-black text-[11px] font-black uppercase tracking-wider shadow-arcade-sm mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-            PHASE 10 • ON-CHAIN ACHIEVEMENTS
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#101522] text-[#F4D35E] rounded-lg border border-[#1E273D] text-[11px] font-mono font-bold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#F4D35E]" />
+            ON-CHAIN ACHIEVEMENTS
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-arcade-black tracking-tight leading-none">
-            HUNTER <span className="text-arcade-electric">BADGES</span>
+          <h2 className="text-4xl md:text-5xl font-display font-black text-white tracking-wider uppercase leading-none">
+            HUNTER <span className="text-[#E63946]">BADGES</span>
           </h2>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="bg-white rounded-2xl border-3 border-arcade-black px-4 py-2 shadow-arcade-sm flex items-center gap-2">
-            <span className="text-xs font-black uppercase text-arcade-black/60">UNLOCKED:</span>
-            <span className="text-lg font-black text-emerald-600">
+          <div className="bg-[#0B0F17] rounded-xl border border-[#1E273D] px-4 py-2 flex items-center gap-2 font-mono">
+            <span className="text-xs uppercase text-[#64748B] font-bold">UNLOCKED:</span>
+            <span className="text-lg font-black text-[#00E676]">
               {unlockedCount} / {achievements.length}
             </span>
           </div>
-          <div className="px-3 py-1.5 bg-arcade-yellow rounded-xl border-2 border-arcade-black text-xs font-black uppercase">
-            Achievements.sol
+          <div className="px-3 py-1.5 bg-[#101522] rounded-lg border border-[#1E273D] text-xs font-mono font-bold uppercase text-[#94A3B8]">
+            HuntCore.sol
           </div>
         </div>
       </div>
@@ -77,48 +74,50 @@ export const AchievementsShowcase: React.FC<AchievementsShowcaseProps> = ({
           return (
             <div
               key={ach.id}
-              className={`arcade-card p-5 relative overflow-hidden transition-all flex flex-col justify-between ${
+              className={`p-5 rounded-xl border transition-all flex flex-col justify-between ${
                 ach.unlocked
-                  ? "bg-white border-arcade-black shadow-arcade-md ring-2 ring-arcade-electric/30"
-                  : "bg-slate-100/80 border-slate-300 opacity-75"
+                  ? "bg-[#0B0F17] border-[#E63946]/50 shadow-[0_0_20px_rgba(230,57,70,0.15)] ring-1 ring-[#E63946]/30"
+                  : "bg-[#0A0E17]/60 border-[#1E273D] opacity-60"
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div
-                    className={`w-12 h-12 rounded-xl border-3 border-arcade-black flex items-center justify-center shadow-arcade-sm ${
-                      ach.unlocked ? "bg-arcade-yellow" : "bg-slate-200 border-slate-400"
+                    className={`w-12 h-12 rounded-xl border flex items-center justify-center ${
+                      ach.unlocked
+                        ? "bg-[#F4D35E]/15 border-[#F4D35E]/40"
+                        : "bg-[#101522] border-[#1E273D]"
                     }`}
                   >
                     {ach.unlocked ? (
                       renderIcon(ach.icon, true)
                     ) : (
-                      <Lock className="w-5 h-5 text-slate-500" />
+                      <Lock className="w-5 h-5 text-[#64748B]" />
                     )}
                   </div>
 
                   <span
-                    className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                    className={`text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border ${
                       ach.unlocked
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-500"
-                        : "bg-slate-200 text-slate-600 border-slate-400"
+                        ? "bg-[#00E676]/15 text-[#00E676] border-[#00E676]/40"
+                        : "bg-[#101522] text-[#64748B] border-[#1E273D]"
                     }`}
                   >
                     {ach.unlocked ? "UNLOCKED" : "LOCKED"}
                   </span>
                 </div>
 
-                <div className="text-xl font-black text-arcade-black tracking-tight mb-1">
+                <div className="text-xl font-display font-black text-white tracking-wide uppercase mb-1">
                   {ach.name}
                 </div>
-                <p className="text-xs font-bold text-arcade-black/70 mb-4">
+                <p className="text-xs font-sans text-[#94A3B8] mb-4">
                   {ach.description}
                 </p>
               </div>
 
               {/* Reward & Proof Footer */}
-              <div className="pt-3 border-t-2 border-arcade-black/10 mt-auto flex items-center justify-between">
-                <div className="text-xs font-black text-amber-600">
+              <div className="pt-3 border-t border-[#1E273D] mt-auto flex items-center justify-between font-mono">
+                <div className="text-xs font-bold text-[#F4D35E]">
                   +{ach.xpReward} Hunter XP
                 </div>
 
@@ -127,7 +126,7 @@ export const AchievementsShowcase: React.FC<AchievementsShowcaseProps> = ({
                     href={`https://testnet.monadexplorer.com/tx/${ach.txHash}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[10px] font-black text-arcade-electric flex items-center gap-1 hover:underline"
+                    className="text-[10px] font-bold text-[#457B9D] flex items-center gap-1 hover:text-white transition-colors"
                   >
                     <span>Monad Proof</span>
                     <ExternalLink className="w-3 h-3" />
