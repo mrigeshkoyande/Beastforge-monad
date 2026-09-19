@@ -14,9 +14,7 @@ import {
   ArrowRight,
   ChevronRight,
   Sparkles,
-  Zap,
-  Globe,
-  Radio,
+  Wallet,
 } from "lucide-react";
 import { soundFX } from "@/game/SoundFX";
 import { Beast } from "@/data/mockData";
@@ -24,6 +22,7 @@ import { Beast } from "@/data/mockData";
 interface HeroSectionProps {
   onEnterCity: () => void;
   onWatchTrailer: () => void;
+  onConnectWallet: () => void;
   onSelectTerritoryZone: (territoryId: string) => void;
   playerBeast?: Beast;
   walletConnected?: boolean;
@@ -32,6 +31,7 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onEnterCity,
   onWatchTrailer,
+  onConnectWallet,
   onSelectTerritoryZone,
   playerBeast,
   walletConnected = false,
@@ -44,8 +44,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "ANDHERI",
       status: "CONTESTED",
       color: "#F4D35E",
-      glowColor: "rgba(244, 211, 94, 0.5)",
-      bg: "rgba(244, 211, 94, 0.15)",
+      glowColor: "rgba(244, 211, 94, 0.6)",
+      bg: "rgba(244, 211, 94, 0.18)",
       borderColor: "border-[#F4D35E]",
       textColor: "text-[#F4D35E]",
       icon: Swords,
@@ -57,8 +57,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "BKC",
       status: "LIVE ARENA",
       color: "#E63946",
-      glowColor: "rgba(230, 57, 70, 0.6)",
-      bg: "rgba(230, 57, 70, 0.2)",
+      glowColor: "rgba(230, 57, 70, 0.7)",
+      bg: "rgba(230, 57, 70, 0.25)",
       borderColor: "border-[#E63946]",
       textColor: "text-[#E63946]",
       icon: Target,
@@ -71,8 +71,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "POWAI",
       status: "DOMINATED",
       color: "#00E676",
-      glowColor: "rgba(0, 230, 118, 0.5)",
-      bg: "rgba(0, 230, 118, 0.15)",
+      glowColor: "rgba(0, 230, 118, 0.6)",
+      bg: "rgba(0, 230, 118, 0.18)",
       borderColor: "border-[#00E676]",
       textColor: "text-[#00E676]",
       icon: Shield,
@@ -84,8 +84,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "BANDRA",
       status: "STABLE",
       color: "#457B9D",
-      glowColor: "rgba(69, 123, 157, 0.5)",
-      bg: "rgba(69, 123, 157, 0.18)",
+      glowColor: "rgba(69, 123, 157, 0.6)",
+      bg: "rgba(69, 123, 157, 0.2)",
       borderColor: "border-[#457B9D]",
       textColor: "text-[#457B9D]",
       icon: Shield,
@@ -97,8 +97,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "FORT",
       status: "UNDER ATTACK",
       color: "#E63946",
-      glowColor: "rgba(230, 57, 70, 0.7)",
-      bg: "rgba(230, 57, 70, 0.25)",
+      glowColor: "rgba(230, 57, 70, 0.8)",
+      bg: "rgba(230, 57, 70, 0.28)",
       borderColor: "border-[#E63946]",
       textColor: "text-[#E63946]",
       icon: Swords,
@@ -111,8 +111,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       name: "LOWER PAREL",
       status: "DEFENDING",
       color: "#457B9D",
-      glowColor: "rgba(69, 123, 157, 0.5)",
-      bg: "rgba(69, 123, 157, 0.18)",
+      glowColor: "rgba(69, 123, 157, 0.6)",
+      bg: "rgba(69, 123, 157, 0.2)",
       borderColor: "border-[#457B9D]",
       textColor: "text-[#457B9D]",
       icon: Shield,
@@ -123,26 +123,40 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <section className="relative w-full min-h-[calc(100vh-68px)] flex flex-col justify-between overflow-hidden bg-[#05070B] select-none">
-      {/* 1. Cinematic Background Layers */}
+      {/* 1. Cinematic Background Video & Artwork Layers */}
       <div className="absolute inset-0 z-0">
-        {/* Mumbai City & Giant Beast Artwork */}
-        <Image
-          src="/assets/hero/mumbai-beast-hero.jpg"
-          alt="Futuristic Mumbai City & Monad Beast"
-          fill
-          priority
-          className="object-cover object-right lg:object-center opacity-85 scale-[1.02] filter brightness-95 contrast-110"
+        {/* Subtle Atmospheric Video Layer */}
+        <video
+          src="/media/trailer.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover opacity-20 filter contrast-125 brightness-75 scale-105"
         />
 
-        {/* Tactical Dark Gradients & Atmospheric Fog */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B] via-[#05070B]/80 to-transparent lg:w-3/5 z-1" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-[#05070B]/40 to-transparent z-1" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#05070B]/70 via-transparent to-[#05070B] z-1" />
+        {/* Mumbai City & Beast Artwork Layer */}
+        <div className="absolute inset-0">
+          <Image
+            src="/assets/hero/mumbai-beast-hero.jpg"
+            alt="Futuristic Mumbai City & Monad Beast"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-right opacity-60 filter brightness-90 contrast-125"
+          />
+        </div>
 
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#8B1E2D]/20 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/3 w-[500px] h-[500px] bg-[#E63946]/15 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute top-1/3 right-10 w-80 h-80 bg-[#457B9D]/15 blur-[100px] rounded-full pointer-events-none" />
+        {/* Deep Solid Gradient Mask on the Left to completely eliminate double text from mockup image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B] via-[#05070B]/95 via-45% to-transparent z-1" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-transparent to-[#05070B]/70 z-1" />
+
+        {/* Tactical Scanlines & Atmospheric Glows */}
+        <div className="absolute inset-0 tactical-scanline opacity-25 z-1 pointer-events-none" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#8B1E2D]/25 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-1/3 right-1/3 w-[500px] h-[500px] bg-[#E63946]/20 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 right-10 w-80 h-80 bg-[#457B9D]/20 blur-[110px] rounded-full pointer-events-none" />
       </div>
 
       {/* 2. Floating Upper Right Beast HUD Card */}
@@ -152,7 +166,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             soundFX.playClick();
             onEnterCity();
           }}
-          className="group flex items-center gap-3 bg-[#0A0F1A]/85 backdrop-blur-md border border-[#1E273D] hover:border-[#E63946] px-4 py-2.5 rounded-lg cursor-pointer transition-all shadow-[0_0_20px_rgba(0,0,0,0.8)] hover:shadow-[0_0_25px_rgba(230,57,70,0.3)]"
+          className="group flex items-center gap-3 bg-[#0A0F1A]/90 backdrop-blur-md border border-[#1E273D] hover:border-[#E63946] px-4 py-2.5 rounded-lg cursor-pointer transition-all shadow-[0_0_20px_rgba(0,0,0,0.8)] hover:shadow-[0_0_25px_rgba(230,57,70,0.3)]"
         >
           <div className="relative w-10 h-10 rounded-md bg-[#161B26] border border-[#232B3B] overflow-hidden flex items-center justify-center">
             <span className="text-xl group-hover:scale-110 transition-transform">🐲</span>
@@ -161,7 +175,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="text-left font-mono">
             <div className="text-[10px] text-[#94A3B8] uppercase tracking-wider">YOUR BEAST</div>
             <div className="text-xs font-bold text-white uppercase group-hover:text-[#F4D35E] transition-colors">
-              {playerBeast ? playerBeast.name : "NEON VIPERS"}
+              {playerBeast ? playerBeast.name : "EMBERWYRM"}
             </div>
             <div className="text-[10px] text-[#E63946] font-semibold">
               Lv. {playerBeast ? playerBeast.level : 36}
@@ -188,9 +202,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 }}
                 onMouseEnter={() => setActiveHoveredZone(marker.id)}
                 onMouseLeave={() => setActiveHoveredZone(null)}
-                className="hud-marker pointer-events-auto group hidden md:flex flex-col items-center"
+                className="hud-marker pointer-events-auto group hidden lg:flex flex-col items-center"
               >
-                {/* Tactical Radar Wave Ring for BKC / Live Arena / Under Attack */}
+                {/* Radar pulse for live/attack territories */}
                 {(marker.isLive || marker.isPulse) && (
                   <div
                     className="absolute -inset-3 rounded-xl border border-[#E63946] animate-radar-ring pointer-events-none"
@@ -198,12 +212,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   />
                 )}
 
-                {/* Marker Card */}
+                {/* Marker Badge */}
                 <div
                   className={`relative flex items-center gap-2 px-3 py-1.5 rounded-md border backdrop-blur-md transition-all shadow-lg ${marker.borderColor}`}
                   style={{
                     backgroundColor: marker.bg,
-                    boxShadow: isHovered ? `0 0 20px ${marker.glowColor}` : `0 0 10px ${marker.glowColor}`,
+                    boxShadow: isHovered ? `0 0 25px ${marker.glowColor}` : `0 0 12px ${marker.glowColor}`,
                   }}
                 >
                   <Icon className={`w-3.5 h-3.5 ${marker.textColor}`} />
@@ -229,7 +243,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           })}
 
           {/* Bottom Right Tactical Crosshair HUD */}
-          <div className="absolute bottom-28 right-8 z-10 hidden lg:flex items-center gap-2 font-mono text-xs text-[#94A3B8]/70 bg-[#05070B]/60 backdrop-blur-sm px-3 py-1.5 rounded border border-[#1E273D]">
+          <div className="absolute bottom-28 right-8 z-10 hidden lg:flex items-center gap-2 font-mono text-xs text-[#94A3B8]/80 bg-[#05070B]/80 backdrop-blur-md px-3.5 py-2 rounded-lg border border-[#1E273D] shadow-lg">
             <Crosshair className="w-4 h-4 text-[#E63946] animate-spin" style={{ animationDuration: "12s" }} />
             <div>
               <div className="font-bold text-white tracking-wider text-[10px]">MUMBAI STRATEGIC GRID</div>
@@ -239,15 +253,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
       </div>
 
-      {/* 4. Main Hero Foreground Content (Left Aligned) */}
+      {/* 4. Main Hero Foreground Content (Left-Aligned, Razor-Sharp Interactive HTML) */}
       <div className="relative z-20 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-14 pb-4 flex-1 flex flex-col justify-center">
         <div className="max-w-2xl">
-          {/* Official MONAD HUNT Logo Asset */}
-          <div className="relative w-72 sm:w-96 h-28 sm:h-36 mb-2 -ml-2">
+          {/* Official MONAD HUNT Logo Asset with sizes prop */}
+          <div className="relative w-72 sm:w-96 h-24 sm:h-32 mb-2 -ml-2">
             <Image
               src="/assets/branding/monad-hunt-logo.jpg"
               alt="MONAD HUNT Official Logo"
               fill
+              sizes="(max-width: 640px) 288px, 384px"
               priority
               className="object-contain object-left mix-blend-screen filter contrast-125 brightness-110"
             />
@@ -275,16 +290,30 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-4 mt-8">
-            <button
-              onClick={() => {
-                soundFX.playClick();
-                onEnterCity();
-              }}
-              className="relative group px-7 py-3.5 rounded font-display font-black text-sm sm:text-base uppercase tracking-wider text-white transition-all bg-gradient-to-r from-[#E63946] via-[#B2182B] to-[#8B1E2D] shadow-[0_0_25px_rgba(230,57,70,0.5)] hover:shadow-[0_0_35px_rgba(230,57,70,0.8)] hover:scale-[1.03] active:scale-[0.98] border border-[#FF4D5B]/60 flex items-center gap-2.5"
-            >
-              <span>{walletConnected ? "ENTER THE CITY" : "CONNECT WALLET"}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            {walletConnected ? (
+              <button
+                onClick={() => {
+                  soundFX.playClick();
+                  onEnterCity();
+                }}
+                className="relative group px-7 py-3.5 rounded font-display font-black text-sm sm:text-base uppercase tracking-wider text-white transition-all bg-gradient-to-r from-[#E63946] via-[#B2182B] to-[#8B1E2D] shadow-[0_0_25px_rgba(230,57,70,0.5)] hover:shadow-[0_0_35px_rgba(230,57,70,0.8)] hover:scale-[1.03] active:scale-[0.98] border border-[#FF4D5B]/60 flex items-center gap-2.5"
+              >
+                <span>ENTER THE CITY</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  soundFX.playClick();
+                  onConnectWallet();
+                }}
+                className="relative group px-7 py-3.5 rounded font-display font-black text-sm sm:text-base uppercase tracking-wider text-white transition-all bg-gradient-to-r from-[#E63946] via-[#B2182B] to-[#8B1E2D] shadow-[0_0_25px_rgba(230,57,70,0.5)] hover:shadow-[0_0_35px_rgba(230,57,70,0.8)] hover:scale-[1.03] active:scale-[0.98] border border-[#FF4D5B]/60 flex items-center gap-2.5"
+              >
+                <Wallet className="w-4 h-4" />
+                <span>CONNECT WALLET</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            )}
 
             <button
               onClick={() => {
@@ -299,7 +328,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Compact Live Season Stat Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-10 p-3 sm:p-4 rounded-xl bg-[#0A0E17]/80 border border-[#1E273D]/80 backdrop-blur-md max-w-xl shadow-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-10 p-3 sm:p-4 rounded-xl bg-[#0A0E17]/90 border border-[#1E273D] backdrop-blur-md max-w-xl shadow-2xl">
             <div className="text-left font-mono">
               <div className="flex items-center gap-1.5 text-xs text-[#E63946] font-bold">
                 <Flame className="w-3.5 h-3.5" />
@@ -346,7 +375,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* 5. Bottom Feature Strip matching reference image */}
       <div className="relative z-20 w-full bg-[#05070B]/95 border-t border-[#1E273D] backdrop-blur-xl py-3 px-4 sm:px-8">
         <div className="max-w-[1600px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
-          <div className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors">
+          <div
+            onClick={() => {
+              soundFX.playClick();
+              onEnterCity();
+            }}
+            className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors cursor-pointer"
+          >
             <div className="w-8 h-8 rounded bg-[#E63946]/15 border border-[#E63946]/30 flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-4 h-4 text-[#E63946]" />
             </div>
@@ -354,11 +389,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div className="font-display font-black text-sm uppercase text-white tracking-wide">
                 AI BEASTS
               </div>
-              <div className="text-[10px] font-mono text-[#94A3B8]">Collect & Evolve</div>
+              <div className="text-[10px] font-mono text-[#94A3B8]">Collect &amp; Evolve</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors">
+          <div
+            onClick={() => {
+              soundFX.playAttack();
+              onEnterCity();
+            }}
+            className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors cursor-pointer"
+          >
             <div className="w-8 h-8 rounded bg-[#E63946]/15 border border-[#E63946]/30 flex items-center justify-center flex-shrink-0">
               <Swords className="w-4 h-4 text-[#E63946]" />
             </div>
@@ -370,7 +411,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors">
+          <div
+            onClick={() => {
+              soundFX.playClick();
+              onEnterCity();
+            }}
+            className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors cursor-pointer"
+          >
             <div className="w-8 h-8 rounded bg-[#457B9D]/15 border border-[#457B9D]/30 flex items-center justify-center flex-shrink-0">
               <Shield className="w-4 h-4 text-[#457B9D]" />
             </div>
@@ -382,7 +429,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors">
+          <div
+            onClick={() => {
+              soundFX.playClick();
+              onEnterCity();
+            }}
+            className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors cursor-pointer"
+          >
             <div className="w-8 h-8 rounded bg-[#F4D35E]/15 border border-[#F4D35E]/30 flex items-center justify-center flex-shrink-0">
               <Users className="w-4 h-4 text-[#F4D35E]" />
             </div>
@@ -394,7 +447,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors col-span-2 md:col-span-1">
+          <div
+            onClick={() => {
+              soundFX.playClick();
+              onEnterCity();
+            }}
+            className="flex items-center gap-3 p-2 rounded hover:bg-[#0B0F17] transition-colors col-span-2 md:col-span-1 cursor-pointer"
+          >
             <div className="w-8 h-8 rounded bg-[#00E676]/15 border border-[#00E676]/30 flex items-center justify-center flex-shrink-0">
               <Target className="w-4 h-4 text-[#00E676]" />
             </div>
@@ -402,7 +461,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div className="font-display font-black text-sm uppercase text-white tracking-wide">
                 SEASONS
               </div>
-              <div className="text-[10px] font-mono text-[#94A3B8]">Compete & Rise</div>
+              <div className="text-[10px] font-mono text-[#94A3B8]">Compete &amp; Rise</div>
             </div>
           </div>
         </div>

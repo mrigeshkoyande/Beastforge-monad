@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GameProvider } from "@/context/GameContext";
 
 export const metadata: Metadata = {
   title: "MONAD HUNT 🐲 | Catch. Stake. Battle. Conquer.",
@@ -18,8 +19,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col bg-mh-bg text-mh-text antialiased selection:bg-mh-crimson selection:text-white">
-        {children}
+      <body className="min-h-screen flex flex-col bg-[#05070B] text-white antialiased selection:bg-[#E63946] selection:text-white">
+        <GameProvider>{children}</GameProvider>
       </body>
     </html>
   );

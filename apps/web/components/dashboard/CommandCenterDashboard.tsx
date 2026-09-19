@@ -55,6 +55,7 @@ export const CommandCenterDashboard: React.FC<CommandCenterDashboardProps> = ({
             src="/assets/hero/mumbai-beast-hero.jpg"
             alt="Command Center Mumbai Background"
             fill
+            sizes="100vw"
             priority
             className="object-cover object-right opacity-30 filter contrast-125 brightness-75"
           />

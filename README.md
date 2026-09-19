@@ -1,172 +1,184 @@
 # 🐲 MONAD HUNT: CITY LEAGUE
 *Catch. Stake. Battle. Conquer.*
 
-A persistent competitive on-chain game world where **Hunters** and their **Beasts** battle for territorial control of **Mumbai's 12 proving grounds**, climb an Elo rating ladder, represent **4 Faction Crews**, and settle every single battle on **Monad Testnet**.
+A persistent competitive on-chain cyberpunk gaming world where **Hunters** and their **AI Beasts** battle for territorial dominance across **Mumbai's 12 proving grounds**, climb an integer Elo rating ladder, represent **4 Faction Syndicates**, and settle every battle cryptographically on **Monad Testnet**.
 
-> **"My battle changes the city."**  
-> One click, one confirmed transaction, and a territory's control and influence shifts for every player watching across the globe.
+> **"THE CITY IS THE BATTLEFIELD. MY BATTLE CHANGES THE CITY."**  
+> One click, one confirmed transaction, and a territory's control shifts for every player watching across the globe.
 
 ---
 
 ## 1. Product Overview & Core Game Loop
 
-```
-HUNTER → BEAST → ARENA → BATTLE → SETTLEMENT (on-chain)
+```text
+HUNTER → BEAST → ARENA → BATTLE → SETTLEMENT (EIP-712 on-chain)
    → RATING → TERRITORY INFLUENCE → CREW POINTS
    → ACHIEVEMENT → LEADERBOARD → SEASON 01 → CHAMPIONSHIP
 ```
 
 1. **Hunter Enlistment & Starter Claim**: Connect MetaMask or Web3 wallet to Monad Testnet (`Chain ID 10143`), mint a free deterministic starter Beast NFT (1 free claim per wallet), and pledge allegiance to one of four Faction Crews.
 2. **Mumbai Tactical Map**: Inspect 12 distinct Mumbai proving grounds (Andheri, Bandra, Powai, Fort, BKC, Colaba, Juhu, Dadar, Malad, Thane, Navi Mumbai, Worli). View live statuses: `STABLE`, `CONTESTED`, `UNDER ATTACK`, `DEFENDING`, `LIVE ARENA`, `DOMINATED`.
-3. **Turn-Based Proving Ground Battles**: Engage in elemental combat against autonomous zone guardians. Execute attacks, shields, dodges, and special powers.
+3. **Turn-Based Proving Ground Battles**: Engage in elemental combat against autonomous zone guardians. Execute attacks, shields, dodges, and signature special powers.
 4. **On-Chain Cryptographic Settlement**: The deterministic server oracle validates combat moves and signs an **EIP-712 typed structured digest**. `HuntCore.sol` validates the signature, computes Elo rating deltas, shifts territory influence, credits crew points, and records progress on the Beast NFT.
 5. **Live Settlement Console**: Watch real-time 4-stage transaction execution (`SIGN` → `SUBMITTED` → `CONFIRMING` → `SETTLED`) with measured latency, block number, gas used, and explorer verification link.
 6. **Live World Sync**: Open a second browser window at `/live` to watch the **HUNT FEED** stream incoming `BattleSettled` events and witness live territory bars move in real time.
 
 ---
 
-## 2. Why Monad?
+## 2. Complete Routes Map
 
-- **Real per-battle settlement**: Traditional blockchains force games to batch actions off-chain because of high fees and slow finality. Monad's high throughput and sub-second block times make individual on-chain battle settlement and micro-state changes practical.
-- **Live Measured Latency**: The client measures the exact wall-clock time between transaction submission and receipt receipt verification (`latencyMs`). No hardcoded or fabricated finality claims are ever shown.
+All routes are fully implemented with dedicated page controllers, responsive layouts, and atmospheric backgrounds:
 
----
-
-## 3. Architecture & Trust Model
-
-```
-┌────────────────────────────────────────────────────────┐
-│             FRONTEND (Next.js 14 + Viem + Wagmi)       │
-│  - Mumbai Tactical Map (SVG + List View)               │
-│  - Battle Screen & Sound FX                            │
-│  - Live Settlement Console (/live feed subscriber)     │
-└──────────────────────────┬─────────────────────────────┘
-                           │ 1. Request Settlement Signature
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│        DETERMINISTIC ORACLE (/api/settle)              │
-│  - Replays moves in BattleEngine.ts                     │
-│  - Computes outcome & winner deterministically         │
-│  - Signs EIP-712 Typed Structured Data Digest          │
-└──────────────────────────┬─────────────────────────────┘
-                           │ 2. EIP-712 Signature + Parameters
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│          MONAD TESTNET SMART CONTRACTS                 │
-│  - BeastNFT.sol (ERC-721 Starter + Attributes)         │
-│  - HuntCore.sol (Authoritative game brain)             │
-│    • EIP-712 Signature Verification                    │
-│    • On-Chain Integer Elo Rating Math (K=32, min 100)  │
-│    • 12 Mumbai Territory Influence Shifts              │
-│    • 4 Crew Points & Streak Multipliers                │
-│    • On-Chain Achievement Bitmask                      │
-│    • Emits rich BattleSettled & TerritoryShifted events│
-└────────────────────────────────────────────────────────┘
-```
-
-### Anti-Cheat & Honest MVP Trust Model
-- **The Problem**: Letting the client dictate battle outcomes or rewards creates trivial exploit vectors.
-- **Our Implementation**: Combat actions are submitted to a deterministic server module that replays the turns step-by-step. The server oracle signs an **EIP-712 `BattleResult`** with a cryptographic domain separator (`chainId: 10143`, `verifyingContract: HuntCore`). The `HuntCore.sol` smart contract verifies the signature on-chain, enforces replay prevention via `battleId` and unique nonces, checks deadlines, and computes all game consequences directly on Monad.
-- **Decentralization Roadmap**: In subsequent phases, deterministic execution will transition to on-chain verification or ZK/TEE state attestations.
+| Route | View Description | Background Atmosphere | Key Functionality |
+| :--- | :--- | :--- | :--- |
+| **`/`** | **Cinematic Landing Page** | `variant="landing"` + Background Video | Hero section matching reference design, official logo, interactive territory HUD pins, live season stats bar, feature strip, 9 landing sections, and Trailer Modal. |
+| **`/app`** | **Command Center Dashboard** | `variant="default"` | Command center header, squad vanguard status, fast dispatch to contested zones, and full crew faction switcher. |
+| **`/arena`** | **Battle Arena & Turn Combat** | `variant="arena"` | Arena Lobby, Beast selection, real-time battle loop with animations, sound effects, and EIP-712 settlement. |
+| **`/map`** | **Mumbai Tactical Map** | `variant="map"` | 12 Mumbai territories with interactive zone inspection, conquest percentages, and fortification actions. |
+| **`/leaderboards`** | **Global Leaderboard** | `variant="leaderboard"` | Top Hunter rankings, win rates, earned MON rewards, top beasts, and live wallet address highlighting. |
+| **`/crews`** | **Faction War Syndicates** | `variant="crews"` | 4 Cyber Factions (Neon Vipers, Cyber Wolves, Solar Titans, Shadow Syndicate) with lore, season points, and allegiance toggle. |
+| **`/hunt-tv`** | **Hunt TV & Battle Telemetry** | `variant="hunt-tv"` | Esports battle highlight cards, live spectator stream, and recent on-chain verdicts. |
+| **`/profile`** | **Hunter & Beast Profile** | `variant="profile"` | Personal stats, owned Beast inventory, ability unlocks, level-up progression, and achievement showcase. |
+| **`/live`** | **Live Settlement Feed** | `variant="hunt-tv"` | Real-time SSE/telemetry stream of battle confirmations on Monad Testnet. |
 
 ---
 
-## 4. Deployed Smart Contracts (Monad Testnet)
+## 3. Real Web3 Wallet Integration
 
-| Contract | Address | Verification / Explorer |
-| :--- | :--- | :--- |
-| **`HuntCore.sol`** | `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` | [View on MonadExplorer ↗](https://testnet.monadexplorer.com/address/0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0) |
-| **`BeastNFT.sol`** | `0x5FbDB2315678afecb367f032d93F642f64180aa3` | [View on MonadExplorer ↗](https://testnet.monadexplorer.com/address/0x5FbDB2315678afecb367f032d93F642f64180aa3) |
-| **Settlement Signer** | `0xa0Ee7A142d267C1f36714E4a8F75612F20a79720` | Authorized EIP-712 Oracle Signer |
+### Supported Wallets & Providers
+- **Injected Web3 Wallets**: MetaMask, Rabby, Coinbase Wallet, Brave Wallet, and all EIP-1193 standard EVM providers.
+- **Library Stack**: Native `Viem` (`v2.56.5`) + `Wagmi` (`v3.7.7`) + `@tanstack/react-query`.
 
----
+### Network Parameters
+- **Network Name**: Monad Testnet
+- **Chain ID**: `10143` (`0x279f` in hex)
+- **Currency Symbol**: `MON` (18 decimals)
+- **RPC URL**: `https://testnet-rpc.monad.xyz/`
+- **Block Explorer**: `https://testnet.monadexplorer.com`
 
-## 5. Mumbai Proving Grounds & Faction Crews
-
-### 12 Mumbai Territories
-1. **Andheri Arena** (Western Suburbs) — High-octane industrial neon proving grounds.
-2. **Bandra Coast** (West Coast) — Sea-spray battle cliffs overlooking the Sea Link.
-3. **Powai Tech Hub** (Central Valley) — Lakeside tech valley and incubator enclaves.
-4. **Fort Colosseum** (South District) — Historic Victorian gothic stone colosseum.
-5. **BKC Skyscraper** (Financial Hub) — Rooftop glass-and-steel helipad stadium.
-6. **Colaba Point** (Historic South) — Southern tip citadel flanked by naval causeways.
-7. **Juhu Shore** (Coastal Strip) — Golden sands battleground over sunset tides.
-8. **Dadar Junction** (Heartland) — Central rail nexus where arterial routes converge.
-9. **Malad Ridge** (Northern Heights) — Elevated rocky heights guarding media estates.
-10. **Thane Gates** (Northeastern Gateway) — Gateway citadel spanning eastern lake mountains.
-11. **Navi Mumbai Port** (Eastern Industrial) — Deep-water container logistics docks.
-12. **Worli Seafront** (Central Coast) — Luxury high-rise coastal esplanade.
-
-### 4 Faction Crews
-- **Neon Vipers** (Electric Purple): High-speed cyber strike specialists dominating Northern & Western Mumbai.
-- **Cyber Wolves** (Cyan Blue): Tactical coastal pack masters controlling the Arabian Sea seafronts.
-- **Solar Titans** (Solar Amber): Heavy power generators and tech enclave fortification leaders in Central Valley.
-- **Shadow Syndicate** (Crimson Red): Aggressive underground skirmishers reigning over historic South districts.
+### Robust Error & Network Handling
+1. **Wallet Detection**: If no browser wallet is detected, prompts: *"No Web3 wallet detected. Please install MetaMask to interact with Monad Testnet."*
+2. **Automatic Network Switch**: Automatically requests `wallet_switchEthereumChain` to Chain ID `10143`. If Monad Testnet is not yet added to the user's wallet, it automatically dispatches `wallet_addEthereumChain` with official Monad RPC and explorer metadata.
+3. **Rejection Handling**: Gracefully handles user rejection (`code: 4001`) and pending requests (`code: -32002`) without throwing raw console errors.
+4. **Auto-Reconnection**: Re-hydrates authorized accounts on page load and listens to `accountsChanged` and `chainChanged` events.
+5. **Simulated Mode Fallback**: Users without a wallet or testnet MON can toggle `SIMULATED` mode to test the complete combat, progression, and territory conquest loop without blockchain friction.
 
 ---
 
-## 6. Monad-Native Cyber Esports Design System
+## 4. Media Assets & Video Streaming
 
-- **Surfaces**: Dark Obsidian (`#0B0E14`, `#10141D`, `#161B26`, `#1E2535`, `#232B3B`).
-- **Primary Accent**: Monad Purple (`#836EF9`, `#A594FF`).
-- **Semantic Accents**: Red (`#FF1A2A`) for LIVE / Attack state ONLY; Yellow (`#FFCC00`) for rewards / ELO only; Blue (`#00B0FF`) for defense; Green (`#00E676`) for verified victory.
-- **Signature Geometry**: `skewX(-12deg)` angled buttons (`.mh-btn`), badges (`.mh-badge`), and title bars with counter-skewed inner typography.
-- **Typography**: `Barlow Condensed` (display headers), `Inter` (body text), `JetBrains Mono` (hashes, block numbers, telemetry).
-
----
-
-## 7. 3-Minute Live Hackathon Demo Script
-
-1. **Landing & Identity**: Open site (`/`) → View `MONAD HUNT / CITY LEAGUE / SEASON 01 — MUMBAI`.
-2. **Wallet Connection**: Click `CONNECT WALLET` → MetaMask auto-prompts and switches to **Monad Testnet (10143)**.
-3. **Starter Claim & Crew Pledge**: Click `CLAIM FREE STARTER BEAST` (executes `mintStarter`), select **Neon Vipers** (`joinCrew`).
-4. **Tactical Map Exploration**: Click **POWAI TECH HUB** (`LIVE ARENA`) on the interactive SVG radar map.
-5. **Arena Combat**: Click `ENTER ARENA` → Launch turn-based battle against guardian Tidewarden. Execute attacks, power moves, and shields.
-6. **Live Settlement Console**: Upon match finish, witness the 4-stage console:
-   - `[1] SIGN` (EIP-712 digest generated & wallet prompted)
-   - `[2] SUBMITTED` (Real Tx Hash displayed with copy & explorer links)
-   - `[3] CONFIRMING` (Live timer ticks while waiting for Monad receipt)
-   - `[4] SETTLED` (Displays exact block number, gas used, and measured latency in ms)
-7. **Two-Window Live City Sync**: In a second browser window, navigate to `/live`. As soon as the first window settles, the live **HUNT FEED** instantly renders the settlement event and shifts the territory dominance bar in real time!
-8. **Progression & Standings**: Inspect the Victory Modal (`▲ +24 ELO`, `+16% Influence`, `+49 Crew Points`), check updated Hunter Leaderboards and Profile.
+- **Official Video Trailer**: Stored locally in `public/media/trailer.mp4` (~5.38 MB).
+- **Trailer Modal Player**: Triggered by `[ WATCH TRAILER ▶ ]` in the hero section and sections throughout the app. Features HTML5 video controls, keyboard accessibility (`Esc` to close), and automatic pause on exit.
+- **Cinematic Atmospheric Background**: High-performance `<video autoPlay muted loop playsInline>` embedded with low opacity and dark gradient masking in `HeroSection.tsx` and `CinematicBackground.tsx`.
+- **Official Branding**: Original high-resolution logo asset located at `public/assets/branding/monad-hunt-logo.jpg`.
 
 ---
 
-## 8. Local Development & Verification
+## 5. Deployed Smart Contracts (Monad Testnet)
+
+| Contract | Address | Explorer Link | Purpose |
+| :--- | :--- | :--- | :--- |
+| **`HuntCore.sol`** | `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` | [MonadExplorer ↗](https://testnet.monadexplorer.com/address/0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0) | Authoritative game brain, EIP-712 signature verification, integer Elo rating deltas, territory conquest, crew points, and achievements. |
+| **`BeastNFT.sol`** | `0x5FbDB2315678afecb367f032d93F642f64180aa3` | [MonadExplorer ↗](https://testnet.monadexplorer.com/address/0x5FbDB2315678afecb367f032d93F642f64180aa3) | ERC-721 Beast NFT contract managing on-chain combat attributes, levels, and evolution stages. |
+| **Settlement Signer** | `0xa0Ee7A142d267C1f36714E4a8F75612F20a79720` | Authorized Oracle | Off-chain deterministic battle move validator and EIP-712 signer. |
+
+---
+
+## 6. Local Development Setup
 
 ### Prerequisites
-- Node.js >= 18
-- npm / pnpm / yarn
-- Foundry (for smart contract tests and deployment)
+- Node.js `20.x` or higher
+- npm or pnpm
+- Git
 
-### Running the Web Application
+### Installation & Run
 ```bash
-# Install dependencies
-cd apps/web
+# 1. Clone repository
+git clone https://github.com/mrigeshkoyande/Beastforge-monad.git
+cd Beastforge-monad/apps/web
+
+# 2. Install dependencies
 npm install
 
-# Run development server
-npm run dev
+# 3. Configure environment
+cp ../../.env.example .env.local
 
-# Run TypeScript check & production build
-npm run typecheck
-npm run build
+# 4. Start development server
+npm run dev
 ```
 
-### Running Foundry Smart Contract Tests
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 7. Production Build & Validation
+
 ```bash
-cd contracts
-forge test -vvv
+# Typecheck TypeScript files
+npm run typecheck
+
+# Build optimized production bundle
+npm run build
+
+# Start production server
+npm run start
 ```
 
 ---
 
-## 9. Security & Rules Verification Checklist
+## 8. Docker Deployment
 
-- [x] No private keys or secret keys exposed in client bundles or repository history.
-- [x] `.env.example` provides complete configuration placeholders.
-- [x] EIP-712 structured data signing with domain separator (`chainId`, `verifyingContract`, `battleId`, `nonce`, `deadline`).
-- [x] Replay and duplicate settlement prevention enforced on-chain.
-- [x] Access control (`DEFAULT_ADMIN_ROLE`, `ARENA_MANAGER_ROLE`, `SETTLER_ROLE`) and Pausable state controls.
-- [x] Player Beasts never leave the player's wallet during battles.
-- [x] No fake transaction hashes, fake block numbers, or fake explorer links. Demo mode clearly marked with `SIMULATED DATA`.
+The application features a production-ready, multi-stage `Dockerfile` with Next.js `standalone` output for minimal container footprint:
+
+```bash
+# Build Docker image
+docker build -t monad-hunt .
+
+# Run Docker container
+docker run -p 3000:3000 monad-hunt
+```
+
+Access the containerized application at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 9. Vercel Deployment Guide
+
+### Deployment Steps
+1. Push repository to GitHub (`main` branch).
+2. Connect your repository in the [Vercel Dashboard](https://vercel.com).
+3. Set **Root Directory** to `apps/web`.
+4. Configure the following environment variables in Vercel:
+
+| Variable Name | Required | Example Value | Description |
+| :--- | :--- | :--- | :--- |
+| `NEXT_PUBLIC_MONAD_CHAIN_ID` | Yes | `10143` | Monad Testnet Chain ID |
+| `NEXT_PUBLIC_MONAD_RPC_URL` | Yes | `https://testnet-rpc.monad.xyz/` | Official Monad Testnet RPC endpoint |
+| `NEXT_PUBLIC_MONAD_EXPLORER_URL` | Yes | `https://testnet.monadexplorer.com` | Monad Block Explorer URL |
+| `NEXT_PUBLIC_HUNT_CORE_ADDRESS` | Yes | `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` | HuntCore contract address |
+| `NEXT_PUBLIC_BEAST_NFT_ADDRESS` | Yes | `0x5FbDB2315678afecb367f032d93F642f64180aa3` | BeastNFT contract address |
+| `NEXT_PUBLIC_RESOLVER_ADDRESS` | Yes | `0xa0Ee7A142d267C1f36714E4a8F75612F20a79720` | Authorized Oracle signer address |
+| `SETTLEMENT_SIGNER_PRIVATE_KEY` | Yes | *(Server-only key)* | Private key for signing EIP-712 battle settlements in `/api/settle` |
+
+> [!CAUTION]
+> **Security Reminder**: Never expose `SETTLEMENT_SIGNER_PRIVATE_KEY` or any deployer private keys in client-side bundles or repository commits.
+
+---
+
+## 10. QA & Verification Checklist
+
+- [x] **Landing Page (`/`)**: Hero section displays official logo, Mumbai city & beast visual, live season counters, and feature strip.
+- [x] **No Text Ghosting**: Left-side gradient mask eliminates all duplicate burned-in mockup text.
+- [x] **Video Trailer**: `[ WATCH TRAILER ▶ ]` modal streams `public/media/trailer.mp4` with audio controls.
+- [x] **Interactive HUD Pins**: Clicking map markers navigates directly to territory inspection.
+- [x] **Complete Navigation**: All navbar links (`HOME`, `ARENA`, `MAP`, `LEADERBOARDS`, `CREWS`, `HUNT TV`, `PROFILE`) route correctly.
+- [x] **Global GameContext**: Wallet state, selected Beast, and territory progression persist across all routes.
+- [x] **Wallet Connection**: Connects to MetaMask, validates Chain ID `10143`, and handles rejections/wrong network.
+- [x] **Zero Empty Black Voids**: `CinematicBackground` provides variant atmospheric textures across all views.
+- [x] **Production Multi-Stage Docker**: Clean standalone Dockerfile and `.dockerignore`.
+- [x] **TypeScript & Next.js Build**: Passes `npm run typecheck` and `npm run build` with **0 errors**.
+
+---
+
+## 11. License
+MONAD HUNT: CITY LEAGUE © 2026. Built on Monad Testnet. All rights reserved.

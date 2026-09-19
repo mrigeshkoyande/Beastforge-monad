@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { CinematicBackground } from "@/components/CinematicBackground";
 import { Radio, Activity, ExternalLink, Shield, Zap, Flame, Award, Swords, ArrowLeft } from "lucide-react";
 import { INITIAL_TERRITORY_WAR, CREWS } from "@/data/warData";
 
@@ -95,20 +96,12 @@ export default function LiveFeedPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-mh-bg text-mh-text flex flex-col justify-between">
+    <main className="min-h-screen bg-[#05070B] text-white flex flex-col justify-between relative">
+      <CinematicBackground variant="hunt-tv" />
       <div>
-        <Navbar
-          activeTab="live"
-          onTabChange={() => {}}
-          walletConnected={false}
-          walletAddress=""
-          monBalance="0.00 MON"
-          onConnectWallet={() => {}}
-          isDemoMode={false}
-          onToggleDemoMode={() => {}}
-        />
+        <Navbar />
 
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-8">
           {/* Top Bar Navigation */}
           <div className="flex items-center justify-between mb-6">
             <Link
