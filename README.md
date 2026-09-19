@@ -1,39 +1,69 @@
 # 🐲 MONAD HUNT: CITY LEAGUE
-*Catch. Stake. Battle. Conquer.*
+### *Catch. Stake. Battle. Conquer.*
 
-A persistent competitive on-chain cyberpunk gaming world where **Hunters** and their **AI Beasts** battle for territorial dominance across **Mumbai's 12 proving grounds**, climb an integer Elo rating ladder, represent **4 Faction Syndicates**, and settle every battle cryptographically on **Monad Testnet**.
+[![Monad Testnet](https://img.shields.io/badge/Blockchain-Monad_Testnet_(10143)-836EF9?style=for-the-badge&logo=ethereum&logoColor=white)](https://testnet.monadexplorer.com)
+[![Next.js 14](https://img.shields.io/badge/Frontend-Next.js_14_App_Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![Viem](https://img.shields.io/badge/Web3-Viem_%2B_Wagmi-1E273D?style=for-the-badge&logo=web3.js&logoColor=white)](https://viem.sh)
+[![Docker](https://img.shields.io/badge/Deployment-Docker_Multi--Stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-E63946?style=for-the-badge)](LICENSE)
+
+A persistent, esports-grade competitive on-chain gaming world where **Hunters** and their **AI Beasts** battle for territorial supremacy across **Mumbai's 12 proving grounds**, climb an authoritative integer Elo rating ladder, represent **4 Cyber Faction Syndicates**, and settle every single battle cryptographically on **Monad Testnet** at sub-second finality.
 
 > **"THE CITY IS THE BATTLEFIELD. MY BATTLE CHANGES THE CITY."**  
-> One click, one confirmed transaction, and a territory's control shifts for every player watching across the globe.
+> One click, one confirmed transaction on Monad, and a territory's control shifts in real time for every player watching across the globe.
 
 ---
 
-## 1. Product Overview & Core Game Loop
+## 🎮 Core Game Loop & Architecture
 
 ```text
-HUNTER → BEAST → ARENA → BATTLE → SETTLEMENT (EIP-712 on-chain)
-   → RATING → TERRITORY INFLUENCE → CREW POINTS
-   → ACHIEVEMENT → LEADERBOARD → SEASON 01 → CHAMPIONSHIP
+HUNTER → BEAST → ARENA → BATTLE → SETTLEMENT (EIP-712 on Monad)
+   → RATING DELTA → TERRITORY INFLUENCE → CREW POINTS
+   → ACHIEVEMENT UNLOCKS → LEADERBOARD → SEASON 01 CHAMPIONSHIP
 ```
 
-1. **Hunter Enlistment & Starter Claim**: Connect MetaMask or Web3 wallet to Monad Testnet (`Chain ID 10143`), mint a free deterministic starter Beast NFT (1 free claim per wallet), and pledge allegiance to one of four Faction Crews.
-2. **Mumbai Tactical Map**: Inspect 12 distinct Mumbai proving grounds (Andheri, Bandra, Powai, Fort, BKC, Colaba, Juhu, Dadar, Malad, Thane, Navi Mumbai, Worli). View live statuses: `STABLE`, `CONTESTED`, `UNDER ATTACK`, `DEFENDING`, `LIVE ARENA`, `DOMINATED`.
-3. **Turn-Based Proving Ground Battles**: Engage in elemental combat against autonomous zone guardians. Execute attacks, shields, dodges, and signature special powers.
-4. **On-Chain Cryptographic Settlement**: The deterministic server oracle validates combat moves and signs an **EIP-712 typed structured digest**. `HuntCore.sol` validates the signature, computes Elo rating deltas, shifts territory influence, credits crew points, and records progress on the Beast NFT.
-5. **Live Settlement Console**: Watch real-time 4-stage transaction execution (`SIGN` → `SUBMITTED` → `CONFIRMING` → `SETTLED`) with measured latency, block number, gas used, and explorer verification link.
-6. **Live World Sync**: Open a second browser window at `/live` to watch the **HUNT FEED** stream incoming `BattleSettled` events and witness live territory bars move in real time.
+```
+┌────────────────────────────────────────────────────────┐
+│             FRONTEND (Next.js 14 + Viem + Wagmi)       │
+│  - Mumbai Tactical Map (Interactive 12 Zones)          │
+│  - Battle Screen & Turn-Based Combat Engine            │
+│  - Live Settlement Console (/live feed subscriber)     │
+│  - Cinematic Video Trailer & Global Atmosphere         │
+└──────────────────────────┬─────────────────────────────┘
+                           │ 1. Request Settlement Signature
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│        DETERMINISTIC ORACLE (/api/settle)              │
+│  - Replays combat actions step-by-step                 │
+│  - Computes winner & ratings deterministically         │
+│  - Signs EIP-712 Typed Structured Data Digest          │
+└──────────────────────────┬─────────────────────────────┘
+                           │ 2. EIP-712 Signature + Parameters
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│          MONAD TESTNET SMART CONTRACTS                 │
+│  - BeastNFT.sol (ERC-721 Starter + Combat Stats)       │
+│  - HuntCore.sol (Authoritative game brain)             │
+│    • EIP-712 Signature Verification                    │
+│    • On-Chain Integer Elo Rating Math (K=32, min 100)  │
+│    • 12 Mumbai Territory Influence Shifts              │
+│    • 4 Crew Points & Streak Multipliers                │
+│    • On-Chain Achievement Bitmask                      │
+│    • Emits rich BattleSettled & TerritoryShifted events│
+└────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 2. Complete Routes Map
+## 🗺️ Complete Application Routes Map
 
-All routes are fully implemented with dedicated page controllers, responsive layouts, and atmospheric backgrounds:
+Every navigation link and game view is fully implemented with dedicated page controllers, responsive layouts, and zero empty black space:
 
-| Route | View Description | Background Atmosphere | Key Functionality |
+| Route | View Description | Atmospheric Background | Key Functionality |
 | :--- | :--- | :--- | :--- |
-| **`/`** | **Cinematic Landing Page** | `variant="landing"` + Background Video | Hero section matching reference design, official logo, interactive territory HUD pins, live season stats bar, feature strip, 9 landing sections, and Trailer Modal. |
-| **`/app`** | **Command Center Dashboard** | `variant="default"` | Command center header, squad vanguard status, fast dispatch to contested zones, and full crew faction switcher. |
-| **`/arena`** | **Battle Arena & Turn Combat** | `variant="arena"` | Arena Lobby, Beast selection, real-time battle loop with animations, sound effects, and EIP-712 settlement. |
+| **`/`** | **Cinematic Landing Page** | `variant="landing"` + Video Atmosphere | Hero section with official logo, live Mumbai territory HUD pins, season stats bar, feature strip, 9 full landing sections, and interactive video trailer modal. |
+| **`/app`** | **Command Center Dashboard** | `variant="default"` | Command center header, active squad vanguard status, fast dispatch to contested zones, and crew faction switcher. |
+| **`/arena`** | **Battle Arena & Turn Combat** | `variant="arena"` | Arena Lobby, Beast selection, real-time battle loop with animations, synthesized sound effects, and EIP-712 settlement. |
 | **`/map`** | **Mumbai Tactical Map** | `variant="map"` | 12 Mumbai territories with interactive zone inspection, conquest percentages, and fortification actions. |
 | **`/leaderboards`** | **Global Leaderboard** | `variant="leaderboard"` | Top Hunter rankings, win rates, earned MON rewards, top beasts, and live wallet address highlighting. |
 | **`/crews`** | **Faction War Syndicates** | `variant="crews"` | 4 Cyber Factions (Neon Vipers, Cyber Wolves, Solar Titans, Shadow Syndicate) with lore, season points, and allegiance toggle. |
@@ -43,7 +73,21 @@ All routes are fully implemented with dedicated page controllers, responsive lay
 
 ---
 
-## 3. Real Web3 Wallet Integration
+## 🎨 Design System & Visual Palette
+
+The application uses an esports-inspired dark cyberpunk palette tailored for maximum visual depth and high contrast:
+
+| Color Token | Hex Code | RGB | Role in Interface |
+| :--- | :--- | :--- | :--- |
+| **Deep Maroon** | `#8B1E2D` | `rgb(139, 30, 45)` | Base card borders, combat backdrops, and button gradients |
+| **Electric Crimson** | `#E63946` | `rgb(230, 57, 70)` | Primary energy, attack actions, live status indicators & glows |
+| **Solar Gold** | `#F4D35E` | `rgb(244, 211, 94)` | Rating points, achievements, tournament highlights & rewards |
+| **Tactical Steel** | `#457B9D` | `rgb(69, 123, 157)` | Defense states, territory nodes, intelligence & secondary accents |
+| **Obsidian Dark** | `#05070B` / `#0B0F17` | `rgb(5, 7, 11)` | Deep cyberpunk contrast surface backgrounds |
+
+---
+
+## ⚡ Real Web3 Wallet System
 
 ### Supported Wallets & Providers
 - **Injected Web3 Wallets**: MetaMask, Rabby, Coinbase Wallet, Brave Wallet, and all EIP-1193 standard EVM providers.
@@ -65,7 +109,7 @@ All routes are fully implemented with dedicated page controllers, responsive lay
 
 ---
 
-## 4. Media Assets & Video Streaming
+## 🎬 Media & Video Trailer Integration
 
 - **Official Video Trailer**: Stored locally in `public/media/trailer.mp4` (~5.38 MB).
 - **Trailer Modal Player**: Triggered by `[ WATCH TRAILER ▶ ]` in the hero section and sections throughout the app. Features HTML5 video controls, keyboard accessibility (`Esc` to close), and automatic pause on exit.
@@ -74,7 +118,31 @@ All routes are fully implemented with dedicated page controllers, responsive lay
 
 ---
 
-## 5. Deployed Smart Contracts (Monad Testnet)
+## 🏛️ 12 Mumbai Territories & 4 Faction Crews
+
+### 12 Strategic Proving Grounds
+1. **Andheri Arena** (Western Suburbs) — High-octane industrial neon proving grounds.
+2. **Bandra Coast** (West Coast) — Sea-spray battle cliffs overlooking the Sea Link.
+3. **Powai Tech Hub** (Central Valley) — Lakeside tech valley and incubator enclaves.
+4. **Fort Colosseum** (South District) — Historic Victorian gothic stone colosseum.
+5. **BKC Skyscraper** (Financial Hub) — Rooftop glass-and-steel helipad stadium.
+6. **Colaba Point** (Historic South) — Southern tip citadel flanked by naval causeways.
+7. **Juhu Shore** (Coastal Strip) — Golden sands battleground over sunset tides.
+8. **Dadar Junction** (Heartland) — Central rail nexus where arterial routes converge.
+9. **Malad Ridge** (Northern Heights) — Elevated rocky heights guarding media estates.
+10. **Thane Gates** (Northeastern Gateway) — Gateway citadel spanning eastern lake mountains.
+11. **Navi Mumbai Port** (Eastern Industrial) — Deep-water container logistics docks.
+12. **Worli Seafront** (Central Coast) — Luxury high-rise coastal esplanade.
+
+### 4 Cyber Faction Syndicates
+- 🐍 **Neon Vipers**: Agility-first strike squad operating from Bandra & Western coastlines.
+- 🐺 **Cyber Wolves**: High-damage predator pack dominating northern and eastern industrial zones.
+- ☀️ **Solar Titans**: Unyielding fortification vanguard rooted in Fort, Colaba, and South Mumbai.
+- 🔮 **Shadow Syndicate**: Tactical disruptor syndicate executing precision ambushes across Powai & BKC.
+
+---
+
+## 📜 Deployed Smart Contracts (Monad Testnet)
 
 | Contract | Address | Explorer Link | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -84,7 +152,7 @@ All routes are fully implemented with dedicated page controllers, responsive lay
 
 ---
 
-## 6. Local Development Setup
+## 🚀 Local Development Setup
 
 ### Prerequisites
 - Node.js `20.x` or higher
@@ -111,13 +179,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 7. Production Build & Validation
+## 🧪 Production Build & Validation
 
 ```bash
 # Typecheck TypeScript files
 npm run typecheck
 
-# Build optimized production bundle
+# Build optimized production bundle (all 16 routes)
 npm run build
 
 # Start production server
@@ -126,15 +194,15 @@ npm run start
 
 ---
 
-## 8. Docker Deployment
+## 🐳 Docker Deployment
 
 The application features a production-ready, multi-stage `Dockerfile` with Next.js `standalone` output for minimal container footprint:
 
 ```bash
-# Build Docker image
+# Build Docker image from repo root
 docker build -t monad-hunt .
 
-# Run Docker container
+# Run container on port 3000
 docker run -p 3000:3000 monad-hunt
 ```
 
@@ -142,7 +210,7 @@ Access the containerized application at [http://localhost:3000](http://localhost
 
 ---
 
-## 9. Vercel Deployment Guide
+## ☁️ Vercel Deployment Guide
 
 ### Deployment Steps
 1. Push repository to GitHub (`main` branch).
@@ -165,20 +233,20 @@ Access the containerized application at [http://localhost:3000](http://localhost
 
 ---
 
-## 10. QA & Verification Checklist
+## ✅ Quality & Security Verification Checklist
 
 - [x] **Landing Page (`/`)**: Hero section displays official logo, Mumbai city & beast visual, live season counters, and feature strip.
 - [x] **No Text Ghosting**: Left-side gradient mask eliminates all duplicate burned-in mockup text.
-- [x] **Video Trailer**: `[ WATCH TRAILER ▶ ]` modal streams `public/media/trailer.mp4` with audio controls.
+- [x] **Video Trailer**: `[ WATCH TRAILER ▶ ]` modal streams `public/media/trailer.mp4` with audio controls and escape key handling.
 - [x] **Interactive HUD Pins**: Clicking map markers navigates directly to territory inspection.
 - [x] **Complete Navigation**: All navbar links (`HOME`, `ARENA`, `MAP`, `LEADERBOARDS`, `CREWS`, `HUNT TV`, `PROFILE`) route correctly.
 - [x] **Global GameContext**: Wallet state, selected Beast, and territory progression persist across all routes.
-- [x] **Wallet Connection**: Connects to MetaMask, validates Chain ID `10143`, and handles rejections/wrong network.
+- [x] **Real Wallet Handshake**: Connects to MetaMask, validates Chain ID `10143`, and handles rejections/wrong network.
 - [x] **Zero Empty Black Voids**: `CinematicBackground` provides variant atmospheric textures across all views.
 - [x] **Production Multi-Stage Docker**: Clean standalone Dockerfile and `.dockerignore`.
 - [x] **TypeScript & Next.js Build**: Passes `npm run typecheck` and `npm run build` with **0 errors**.
 
 ---
 
-## 11. License
+## 📄 License
 MONAD HUNT: CITY LEAGUE © 2026. Built on Monad Testnet. All rights reserved.
