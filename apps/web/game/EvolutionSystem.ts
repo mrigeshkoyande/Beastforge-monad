@@ -31,6 +31,16 @@ export interface TerritoryWarBattle {
   rewardEarned: string;
 }
 
+export type TerritoryStatus =
+  | "STABLE"
+  | "CONTESTED"
+  | "UNDER ATTACK"
+  | "DEFENDING"
+  | "LIVE ARENA"
+  | "DOMINATED"
+  | "CHALLENGEABLE"
+  | "FORTIFIED";
+
 export interface TerritoryWarState {
   id: string;
   numericId: number;
@@ -49,7 +59,7 @@ export interface TerritoryWarState {
   baseReward: string;
   entryFee: string;
   rarity: "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
-  status: "CHALLENGEABLE" | "CONTESTED" | "FORTIFIED";
+  status: TerritoryStatus;
   conqueredCount: number;
   description: string;
   badgeBg: string;
@@ -57,13 +67,25 @@ export interface TerritoryWarState {
   mapCoordinates: { x: number; y: number }; // percentage on interactive map canvas
   landmark: string;
   district: string;
+  controllingCrewId?: number;
+  crewInfluence?: number[];
   recentBattles: TerritoryWarBattle[];
 }
 
 export interface AchievementItem {
   id: number;
   name: string;
-  code: "FIRST_BLOOD" | "WARRIOR" | "UNSTOPPABLE" | "CONQUEROR" | "MONAD_CHAMPION";
+  code:
+    | "FIRST_BLOOD"
+    | "THREE_PEAT"
+    | "TERRITORY_HUNTER"
+    | "CREW_WARRIOR"
+    | "CITY_HUNTER"
+    | "ARENA_CHAMPION"
+    | "WARRIOR"
+    | "UNSTOPPABLE"
+    | "CONQUEROR"
+    | "MONAD_CHAMPION";
   description: string;
   icon: string;
   xpReward: number;
@@ -265,7 +287,6 @@ export function calculatePostBattleProgression(
     leveledUp = true;
   }
 
-  // Determine stage
   let newStage: EvolutionStage = "BASE";
   if (newLevel >= 25) {
     newStage = "OMEGA";
@@ -276,13 +297,11 @@ export function calculatePostBattleProgression(
   const prevStage: EvolutionStage = currentLevel >= 25 ? "OMEGA" : currentLevel >= 15 ? "PRIME" : "BASE";
   const evolved = newStage !== prevStage;
 
-  // New win streak
   const newWinStreak = isVictory ? currentWinStreak + 1 : 0;
 
-  // Check ability unlock
   let unlockedAbility: BeastAbility | null = null;
   const beastConf = EVOLUTION_CONFIG.vortex;
-  if (leveledUp) {
+  if (leveledUp && beastConf) {
     const ability = beastConf.abilities.find((a) => a.unlockedAtLevel === newLevel);
     if (ability) unlockedAbility = ability;
   }
