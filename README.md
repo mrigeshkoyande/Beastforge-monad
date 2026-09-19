@@ -12,51 +12,51 @@
 
 ## Overview
 
-**MONAD HUNT: CITY LEAGUE** is a competitive Web3 gaming application where players collect and evolve AI Beasts, battle other players in real-time tactical combat, gain integer Elo rating points, conquer territories across Mumbai, compete through faction Crews, and participate in seasonal championships with cryptographic settlement on **Monad Testnet**.
+**MONAD HUNT: CITY LEAGUE** is an esports-grade, competitive Web3 gaming application where players collect and evolve AI Beasts, battle rival Hunters in real-time turn-based tactical combat, gain integer Elo rating points, conquer territories across a virtual cyberpunk Mumbai, compete through 4 faction Syndicates, and participate in seasonal championships with cryptographic settlement on **Monad Testnet** at sub-second finality.
 
 ```text
 Hunter
  ↓
 Beast
  ↓
-Battle
+Battle Arena
  ↓
-Rating Delta
+Elo Rating Delta (K=32)
  ↓
-Territory Influence
+Territory Control Shift
  ↓
-Crew Points
+Crew Syndicate Points
  ↓
-Season Championship
+Season 01 Championship
 ```
 
 ---
 
 ## Why MONAD HUNT?
 
-Traditional Web3 games suffer from high transaction latency, prohibitive gas fees for gameplay actions, and disconnected economic loops. 
+Traditional Web3 games suffer from high transaction latency, prohibitive gas costs for gameplay turns, low visual quality, and client-side memory exploits.
 
-MONAD HUNT is designed from the ground up to leverage the high-throughput, EVM-compatible environment of **Monad Testnet** to achieve:
-1. **Sub-second Finality**: Near-instant combat validation and state confirmation.
-2. **True On-Chain Settlement**: Every battle verdict, rating adjustment, and territory conquest is settled cryptographically via EIP-712 typed data signatures without trusting frontend financial or state calculations.
-3. **Persistent Progression**: Beast statistics, levels, territory ownership percentages, and faction crew point ladders exist permanently on the Monad blockchain.
-4. **Esports-Ready Competitive Integrity**: An authoritative integer Elo rating engine prevents rating inflation and fraud.
+MONAD HUNT leverages **Monad Testnet** to solve these fundamental bottlenecks:
+1. **Sub-second Settlement Finality**: Instant combat validation and state confirmation on Monad.
+2. **Authoritative EIP-712 Settlement**: Battle moves are validated deterministically step-by-step; the oracle signs an EIP-712 typed structured data payload verified directly on-chain by `HuntCore.sol`.
+3. **Persistent Progression**: Beast attributes, levels, territory ownership percentages, and crew point ladders exist permanently on the Monad blockchain.
+4. **Esports Competitive Integrity**: Integer Elo rating engine prevents inflation and rating manipulation.
 
 ---
 
 ## Problem
 
-- **Boring Crypto Dashboards**: Most blockchain games look like DeFi dashboards rather than atmospheric, adrenaline-pumping video games.
-- **Client-Side Exploits**: Games that calculate battle results purely in client-side JavaScript are easily manipulated by players tampering with memory or network payloads.
-- **Disconnected World Lore**: Games lack geographic stakes or persistent communal goals that unite players into factions.
+- **Generic Crypto Dashboards**: Most Web3 games look like DeFi admin panels rather than adrenaline-pumping esports titles.
+- **Client-Side Financial Authority**: Games that trust client-side JavaScript for battle calculations are trivially easy to hack.
+- **Disconnected Lore & UI Clutter**: Games overload screens with glowing badges and lack meaningful geographic stakes.
 
 ---
 
 ## Solution
 
-- **Cinematic Tactical HUD Interface**: An esports-grade dark cyberpunk UI featuring atmospheric lighting, tactical grids, custom Monad cursor physics, and custom Monad scrollbar aesthetics.
-- **Deterministic Off-Chain Engine + EIP-712 Settlement**: Battle moves are validated deterministically step-by-step; the oracle issues an EIP-712 structured data signature that the `HuntCore.sol` contract verifies on Monad Testnet before applying rating deltas and territory shifts.
-- **12 Mumbai Territories & 4 Faction Syndicates**: A living virtual Mumbai where battles directly shift zone control in real time.
+- **Cinematic Dark Esports Interface**: High-contrast cyberpunk UI featuring subtle atmospheric lighting, custom Monad cursor physics, and custom Monad scrollbar aesthetics.
+- **Deterministic Off-Chain Engine + On-Chain Proofs**: Every battle verdict and move sequence is verified cryptographically via `ECDSA.recover` in `HuntCore.sol`.
+- **12 Interactive Mumbai Proving Grounds**: A living virtual Mumbai where arena victories directly shift district control percentages in real time.
 
 ---
 
@@ -71,16 +71,16 @@ In a near-future cyberpunk Mumbai, rogue synthetic beasts have emerged across ke
 ## Core Game Loop
 
 ```text
-[ Connect Wallet / Simulated Mode ]
+[ Connect Wallet / Auto Simulated Mode ]
                  ↓
-      [ Select Your Beast ]
+      [ Select Your Fighter Beast ]
                  ↓
    [ Choose Mumbai Territory Zone ]
                  ↓
     [ Enter Battle Arena Lobby ]
                  ↓
    [ Execute Tactical Combat Moves ]
-   (Quick Strike / Power Strike / Shield / Focus)
+   (Quick Strike / Special / Guard / Evade)
                  ↓
  [ Deterministic Move Replay & Oracle Verdict ]
                  ↓
@@ -99,14 +99,14 @@ In a near-future cyberpunk Mumbai, rogue synthetic beasts have emerged across ke
 
 ## Features
 
-- **Turn-Based Combat Engine**: Tactical move selection, attack animations, damage floaters, and synthesized sound effects.
-- **Mumbai Strategic Map**: 12 interactive territories (Andheri, Bandra, Powai, Fort, BKC, Colaba, Juhu, Dadar, Malad, Thane, Navi Mumbai, Worli).
-- **4 Faction Syndicates**: Neon Vipers, Cyber Wolves, Solar Titans, and Shadow Syndicate with individual season standings and allegiance toggles.
+- **Turn-Based Combat Engine**: Tactical move selection, attack animations, damage floaters, and Web Audio API synthesized sound effects.
+- **12 Mumbai Territories**: Andheri, Bandra, Powai, Fort, BKC, Colaba, Juhu, Dadar, Malad, Thane, Navi Mumbai, and Worli.
+- **4 Faction Syndicates**: Neon Vipers, Cyber Wolves, Solar Titans, and Shadow Syndicate.
 - **Global Leaderboard**: Live rankings, win rates, earned MON rewards, and top beast showcases.
 - **Hunt TV**: Live spectator battle stream telemetry and match highlight reel.
 - **Hunter Profile**: Beast evolution chamber, ability unlocks, match history, and achievement badges.
-- **Custom Cursor & Scrollbar**: Subtle red magical dot with smooth trailing lag, ephemeral sparkles, and custom Monad logo scrollbar thumb.
-- **Dual Mode (Live Monad Testnet + Simulated)**: Instant zero-friction demo mode or authentic MetaMask Web3 interaction on Chain ID `10143`.
+- **Custom Cursor & Scrollbar**: 6px red magical dot with smooth trailing lag, ephemeral sparkles, and custom Monad logo scrollbar thumb.
+- **Resilient Dual Mode (Live Monad Testnet + Simulated Fallback)**: Instant zero-friction demo mode or authentic Web3 interaction on Monad Chain ID `10143`.
 
 ---
 
@@ -118,10 +118,10 @@ In a near-future cyberpunk Mumbai, rogue synthetic beasts have emerged across ke
 │        (Next.js 14 App Router, React 18, TailwindCSS)        │
 │                                                             │
 │  • Navbar (Clean Hierarchy, Monad Branding, Compact Wallet) │
-│  • Hero Section (Cinematic Atmosphere, Video, Slogan)       │
-│  • Arena (/arena) | Map (/map) | Leaderboard (/leaderboard) │
+│  • Hero Section (Cinematic Artwork, Video, Slogan)          │
+│  • Arena (/arena) | Map (/map) | Leaderboards (/leaderboards)│
 │  • Crews (/crews) | Hunt TV (/hunt-tv) | Profile (/profile) │
-│  • Custom Cursor Engine (RAF smooth lerp, <15 sparkles)     │
+│  • Custom Cursor Engine (RAF smooth lerp, <12 sparkles)     │
 │  • Global GameContext (State synchronization & sound FX)    │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -155,7 +155,7 @@ In a near-future cyberpunk Mumbai, rogue synthetic beasts have emerged across ke
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript 5.x
-- **Styling**: TailwindCSS + Custom CSS Design System
+- **Styling**: TailwindCSS + Custom Dark Esports Design System
 - **Web3 / Blockchain**: Viem v2.x, Wagmi v3.x, Ethers v6.x
 - **State Management**: React Context (`GameContext.tsx`) + `@tanstack/react-query`
 - **Audio Engine**: Synthesized Web Audio API (`SoundFX.ts`)
@@ -202,9 +202,10 @@ Beastforge-monad/
         │   ├── TerritoryMap.tsx     # Interactive 12-zone Mumbai map
         │   ├── VictoryDefeatModal.tsx# Battle results & rewards
         │   ├── EvolutionModal.tsx   # Beast level up showcase
+        │   ├── TerritoryDetailModal.tsx # High-contrast zone inspection modal
         │   ├── LiveSettlementConsole.tsx # On-chain transaction monitor
         │   └── landing/
-        │       ├── HeroSection.tsx  # Hero header with video background
+        │       ├── HeroSection.tsx  # Hero header with cinematic background
         │       ├── LandingSections.tsx # Interactive landing modules
         │       └── TrailerModal.tsx # Video player modal
         ├── context/
@@ -215,6 +216,8 @@ Beastforge-monad/
         │   └── SoundFX.ts           # Web Audio API sound effects
         └── public/
             ├── assets/              # Branding & artwork assets
+            │   ├── branding/monad-mark.svg # Monad M logo vector asset
+            │   └── hero/mumbai-beast-hero.jpg # Clean reference background art
             ├── media/trailer.mp4    # Official gameplay trailer
             └── icon.svg             # Cyber beast favicon
 ```
@@ -276,7 +279,7 @@ function getBeastStats(uint256 tokenId) external view returns (BeastStats memory
 ## Wallet Integration
 
 - Supported: MetaMask, Rabby, Coinbase Wallet, Brave Wallet, and all EIP-1193 standard EVM providers.
-- Features: Automatic detection, prompt to switch/add Monad Testnet (Chain ID `10143`), balance polling, account change listener, and graceful rejection handling.
+- **Automatic Demo Fallback**: If no wallet extension is detected or if connection is rejected, the application seamlessly activates Simulated Demo Mode (`0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F`) so evaluators are never blocked.
 
 ---
 
@@ -293,9 +296,9 @@ For judges, evaluators, or users without a Web3 wallet, the application includes
 
 - **Turn-Based Actions**:
   - **Quick Strike**: Fast attack with high accuracy.
-  - **Power Strike**: High damage attack with cooldown.
-  - **Shield**: Tactical defense mitigating incoming damage.
-  - **Focus**: Buff attack power and critical strike chance.
+  - **Special Power**: Element-specific finisher move consuming energy.
+  - **Guard**: Tactical defense mitigating incoming damage and generating energy.
+  - **Evade**: Evasive stance boosting dodge probability.
 - **AI Opponents**: Responsive combat algorithms tailored to each territory's difficulty.
 
 ---
@@ -332,10 +335,10 @@ Territory states include: `CONTESTED`, `LIVE ARENA`, `DOMINATED`, `STABLE`, `UND
 
 On-chain bitmask achievement system tracking milestones:
 - `FIRST_BLOOD`: Win your first battle.
-- `STREAK_MASTER`: Achieve a 5-win streak.
-- `TERRITORY_CONQUEROR`: Flip control of a Mumbai territory.
-- `CREW_CHAMPION`: Contribute 500+ points to your syndicate.
-- `BEAST_EVOLVER`: Evolve a Beast to Stage 2.
+- `THREE_PEAT`: Achieve a 3-win streak.
+- `TERRITORY_HUNTER`: Flip control of a Mumbai territory.
+- `CREW_WARRIOR`: Contribute points to your syndicate.
+- `CITY_HUNTER`: Conquer 5 distinct zones.
 
 ---
 
@@ -385,7 +388,7 @@ cp ../../.env.example .env.local
 - **Node.js**: `v20.x` or higher
 - **Package Manager**: `npm` (v10+) or `pnpm`
 - **Git**: `2.x+`
-- **Browser**: Modern desktop browser (Chrome, Brave, Firefox, Edge) with MetaMask extension (optional for simulated mode).
+- **Browser**: Modern desktop browser (Chrome, Brave, Firefox, Edge).
 
 ---
 
@@ -464,7 +467,7 @@ Access the application at [http://localhost:3000](http://localhost:3000).
 1. Import the repository in [Vercel](https://vercel.com).
 2. Set **Root Directory** to `apps/web`.
 3. Set Framework Preset to **Next.js**.
-4. Configure the Environment Variables listed in the table above.
+4. Configure Environment Variables.
 5. Deploy.
 
 ---
@@ -476,7 +479,7 @@ Access the application at [http://localhost:3000](http://localhost:3000).
 2. **Landing Page Inspection**: Review the clean navbar, official branding, Mumbai background, season statistics, and watch the gameplay trailer via `[ WATCH TRAILER ▶ ]`.
 3. **Connect Wallet / Simulated Mode**: Click `[ CONNECT WALLET ]` to connect MetaMask on Monad Testnet (Chain ID 10143) or use the simulated fallback mode.
 4. **Enter Arena**: Navigate to `/arena` or click `[ ENTER THE CITY ]`.
-5. **Execute a Battle**: Click `[ INITIATE BATTLE ]`, choose combat moves (Quick Strike, Power Strike, Shield), and defeat the opponent.
+5. **Execute a Battle**: Click `[ COMMENCE PROVING GROUND BATTLE ]`, choose combat moves (Quick Strike, Special, Guard), and defeat the opponent.
 6. **Observe Settlement**: Watch the Live Settlement Console display the EIP-712 signature verification and on-chain confirmation.
 7. **Inspect Map Progression**: Navigate to `/map` to verify territory influence updates.
 8. **Check Leaderboards & Crews**: Navigate to `/leaderboards` and `/crews` to view Elo rating updates and faction points.
@@ -488,17 +491,18 @@ Access the application at [http://localhost:3000](http://localhost:3000).
 
 ### Evaluation Checklist
 - [x] Application starts cleanly on `http://localhost:3000`
-- [x] Landing page loads with zero double-text ghosting
+- [x] Landing page loads with exact reference artwork and zero double-text ghosting
+- [x] Responsive layout scales across mobile, tablet, and desktop screens
 - [x] Navigation bar is uncluttered with zero glowing green badges
 - [x] Custom Monad logo scrollbar is active
 - [x] Custom red magical dot cursor follows smoothly
 - [x] Cursor disabled on mobile/touch & prefers-reduced-motion
 - [x] Video trailer plays cleanly in modal
-- [x] Wallet connects or operates in simulated mode
+- [x] Wallet connects or seamlessly falls back to simulated mode
 - [x] Arena battle loop executes with animations and sound FX
 - [x] Settlement console confirms battle verdict
-- [x] Elo rating and territory influence update
-- [x] Mumbai Tactical Map interactive inspect works
+- [x] Elo rating and territory influence update dynamically
+- [x] Mumbai Tactical Map interactive zone inspection works with high-contrast dark theme
 - [x] Leaderboards, Crews, Hunt TV, and Profile views load
 
 ---
