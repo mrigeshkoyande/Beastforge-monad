@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# Next.js / Frontend builds
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Smart Contracts / Foundry
+contracts/cache/
+contracts/out/
+contracts/.logs/
+contracts/.ignore/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
