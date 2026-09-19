@@ -149,7 +149,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Deep Solid Gradient Mask on the Left to completely eliminate double text from mockup image */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B] via-[#05070B]/95 via-45% to-transparent z-1" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B] via-[#05070B] via-48% to-transparent z-1" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-transparent to-[#05070B]/70 z-1" />
 
         {/* Tactical Scanlines & Atmospheric Glows */}

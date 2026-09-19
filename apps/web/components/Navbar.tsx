@@ -126,15 +126,7 @@ export const Navbar: React.FC = () => {
 
         {/* Right Controls */}
         <div className="flex items-center gap-3">
-          {/* Monad Testnet Live Status Pill */}
-          <div className="hidden sm:flex items-center gap-2 bg-[#0B101B] border border-[#1E273D] px-3 py-1.5 rounded-full text-xs font-mono text-[#94A3B8]">
-            <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse shadow-[0_0_8px_#00E676]" />
-            <span className="font-semibold text-white tracking-wider">
-              {isDemoMode ? "MONAD TESTNET (SIM)" : "MONAD TESTNET"}
-            </span>
-          </div>
-
-          {/* Sound Toggle */}
+          {/* Sound FX Toggle (Compact) */}
           <button
             onClick={toggleSound}
             className="p-2 rounded-lg bg-[#0E1422] border border-[#1E273D] text-[#94A3B8] hover:text-white hover:border-[#E63946]/50 transition-all"
@@ -148,9 +140,9 @@ export const Navbar: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setWalletDropdownOpen(!walletDropdownOpen)}
-                className="flex items-center gap-2.5 bg-[#0E1422] border border-[#E63946]/60 px-3.5 py-1.5 rounded-lg text-left font-mono hover:border-[#E63946] transition-all"
+                className="flex items-center gap-2.5 bg-[#0E1422] border border-[#E63946]/50 hover:border-[#E63946] px-3.5 py-1.5 rounded-lg text-left font-mono transition-all shadow-[0_0_15px_rgba(230,57,70,0.15)]"
               >
-                <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse shadow-[0_0_8px_#00E676]" />
+                <div className="w-2 h-2 rounded-full bg-[#E63946]" />
                 <div>
                   <div className="text-xs font-bold text-white leading-none">{displayAddress}</div>
                   <div className="text-[10px] text-[#F4D35E] font-bold mt-0.5">{monBalance}</div>
@@ -158,8 +150,18 @@ export const Navbar: React.FC = () => {
               </button>
 
               {walletDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#0B0F17] border border-[#1E273D] rounded-lg shadow-xl p-2 z-50 text-xs font-mono">
-                  <div className="p-2 border-b border-[#1E273D] text-[#94A3B8] break-all">
+                <div className="absolute right-0 mt-2 w-56 bg-[#0B0F17] border border-[#1E273D] rounded-lg shadow-2xl p-2 z-50 text-xs font-mono">
+                  <div className="p-2 border-b border-[#1E273D]">
+                    <div className="text-[10px] uppercase text-[#64748B] font-bold">Network</div>
+                    <div className="text-white text-xs font-semibold flex items-center justify-between mt-0.5">
+                      <span>MONAD TESTNET</span>
+                      <span className="text-[10px] text-[#F4D35E] font-bold">
+                        {isDemoMode ? "SIMULATED" : "CHAIN 10143"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-2 border-b border-[#1E273D] text-[#94A3B8] break-all text-[11px]">
+                    <div className="text-[10px] uppercase text-[#64748B] font-bold mb-0.5">Account</div>
                     {walletAddress}
                   </div>
                   <button
@@ -167,10 +169,10 @@ export const Navbar: React.FC = () => {
                       disconnectWallet();
                       setWalletDropdownOpen(false);
                     }}
-                    className="w-full mt-1 p-2 rounded hover:bg-[#E63946]/20 text-[#E63946] flex items-center gap-2 text-left font-bold"
+                    className="w-full mt-1 p-2 rounded hover:bg-[#E63946]/20 text-[#E63946] flex items-center gap-2 text-left font-bold transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Disconnect</span>
+                    <span>Disconnect Wallet</span>
                   </button>
                 </div>
               )}
@@ -203,8 +205,8 @@ export const Navbar: React.FC = () => {
         <div className="xl:hidden mt-3 pt-3 border-t border-[#1E273D] bg-[#05070B] rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-[#1E273D] text-xs font-mono text-[#94A3B8]">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#00E676]" />
-              MONAD TESTNET (CHAIN ID 10143)
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E63946]" />
+              MONAD TESTNET
             </span>
             <button
               onClick={() => setIsDemoMode(!isDemoMode)}
