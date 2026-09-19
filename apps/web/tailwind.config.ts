@@ -1,4 +1,4 @@
-﻿import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
@@ -10,45 +10,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        warm: {
-          50: "#FFFDF9",
-          100: "#FAF7EE",
-          200: "#F4EFE0",
-          300: "#E9E2CE",
+        mh: {
+          bg: "#0B0E14",
+          navy: "#10141D",
+          card: "#161B26",
+          cardHover: "#1E2535",
+          border: "#232B3B",
+          primary: "#836EF9",
+          primaryGlow: "#A594FF",
+          live: "#FF1A2A",
+          reward: "#FFCC00",
+          defend: "#00B0FF",
+          win: "#00E676",
+          silver: "#8F9DAE",
+          text: "#FFFFFF",
+          text2: "#94A3B8",
+          text3: "#64748B",
         },
-        arcade: {
-          black: "#080808",
-          blue: "#1D4ED8",
-          electric: "#2563EB",
-          mint: "#86EFAC",
-          mintDark: "#4ADE80",
-          coral: "#FDA4AF",
-          coralDark: "#FB7185",
-          yellow: "#FEF08A",
-          yellowDark: "#FDE047",
-          purple: "#D8B4FE",
-          purpleDark: "#C084FC",
-        },
-      },
-      boxShadow: {
-        arcade: "4px 4px 0px #080808",
-        "arcade-sm": "2px 2px 0px #080808",
-        "arcade-lg": "6px 6px 0px #080808",
-        "arcade-xl": "8px 8px 0px #080808",
-      },
-      borderWidth: {
-        "3": "3px",
-        "4": "4px",
-        "5": "5px",
-      },
-      borderRadius: {
-        "2xl": "18px",
-        "3xl": "24px",
-        "4xl": "32px",
       },
       fontFamily: {
-        display: ["Impact", "Trebuchet MS", "sans-serif"],
-        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        display: ["'Barlow Condensed'", "Impact", "sans-serif"],
+        sans: ["'Inter'", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["'JetBrains Mono'", "monospace"],
+      },
+      boxShadow: {
+        "mh-glow": "0 0 20px rgba(131, 110, 249, 0.4)",
+        "mh-card": "0 8px 24px rgba(0, 0, 0, 0.5)",
+        "mh-live": "0 0 15px rgba(255, 26, 42, 0.5)",
+      },
+      transform: {
+        skew12: "skewX(-12deg)",
+        unskew12: "skewX(12deg)",
       },
     },
   },

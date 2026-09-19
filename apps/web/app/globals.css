@@ -1,92 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-warm: #FAF7EE;
-  --arcade-black: #080808;
+  /* Surfaces */
+  --mh-bg: #0B0E14;
+  --mh-navy: #10141D;
+  --mh-card: #161B26;
+  --mh-card-hover: #1E2535;
+  --mh-border: #232B3B;
+
+  /* Monad Identity */
+  --mh-primary: #836EF9;
+  --mh-primary-glow: #A594FF;
+
+  /* Semantic Accents */
+  --mh-live: #FF1A2A;   /* LIVE indicators & Attack state ONLY */
+  --mh-reward: #FFCC00; /* Rating gains, achievements, championship */
+  --mh-defend: #00B0FF; /* Defending / stable territory */
+  --mh-win: #00E676;    /* Victory / verified */
+  --mh-silver: #8F9DAE;
+
+  /* Text */
+  --mh-text: #FFFFFF;
+  --mh-text-2: #94A3B8;
+  --mh-text-3: #64748B;
 }
 
 body {
-  background-color: var(--bg-warm);
-  color: var(--arcade-black);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--mh-bg);
+  color: var(--mh-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
 
-/* Custom Arcade Scrollbar */
+/* Monad Obsidian Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2563EB #FAF7EE;
+  scrollbar-color: #836EF9 #0B0E14;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF7EE;
-  border-left: 2px solid #080808;
-  border-top: 2px solid #080808;
+  background: #0B0E14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2563EB;
-  border: 2px solid #080808;
-  border-radius: 6px;
-  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.4);
+  background: #232B3B;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #1D4ED8;
+  background: #836EF9;
 }
 
-::-webkit-scrollbar-corner {
-  background: #FAF7EE;
-  border: 2px solid #080808;
-}
-
-/* Neo-Brutalist Arcade Buttons & Cards */
-.arcade-btn {
-  border: 3px solid #080808;
-  box-shadow: 4px 4px 0px #080808;
-  transition: all 0.12s ease-in-out;
+/* Signature Monad 12-deg Angled Buttons & Elements */
+.mh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
   text-transform: uppercase;
-}
-.arcade-btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #080808;
-}
-.arcade-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #080808;
-}
-
-.arcade-card {
-  border: 4px solid #080808;
-  box-shadow: 5px 5px 0px #080808;
-  border-radius: 20px;
+  letter-spacing: 0.05em;
+  transform: skewX(-12deg);
+  transition: all 0.15s ease-in-out;
+  border: 1px solid var(--mh-border);
+  background: var(--mh-primary);
+  color: #FFFFFF;
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
 }
 
-.arcade-badge {
-  border: 2px solid #080808;
-  box-shadow: 2px 2px 0px #080808;
+.mh-btn > * {
+  transform: skewX(12deg);
+}
+
+.mh-btn:hover {
+  background: var(--mh-primary-glow);
+  box-shadow: 0 0 15px rgba(131, 110, 249, 0.5);
+}
+
+.mh-btn:active {
+  transform: skewX(-12deg) translateY(1px);
+}
+
+.mh-btn-secondary {
+  background: #161B26;
+  border-color: #232B3B;
+  color: #FFFFFF;
+}
+
+.mh-btn-secondary:hover {
+  background: #1E2535;
+  border-color: #836EF9;
+}
+
+.mh-btn-live {
+  background: #FF1A2A;
+  border-color: #FF1A2A;
+}
+
+.mh-btn-live:hover {
+  background: #FF4D5B;
+  box-shadow: 0 0 15px rgba(255, 26, 42, 0.6);
+}
+
+.mh-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  transform: skewX(-12deg);
+  display: inline-flex;
+  align-items: center;
+}
+
+.mh-badge > * {
+  transform: skewX(12deg);
+}
+
+.mh-title-bar {
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   font-weight: 800;
 }
 
-/* Screen shake for intense attacks */
+.mh-card {
+  background-color: var(--mh-card);
+  border: 1px solid var(--mh-border);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.mh-card:hover {
+  border-color: rgba(131, 110, 249, 0.4);
+}
+
+/* Animations */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.9); }
+}
+
+.animate-pulse-live {
+  animation: pulse-live 1.5s ease-in-out infinite;
+}
+
 @keyframes shake {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  20% { transform: translate(-6px, 4px) rotate(-1deg); }
-  40% { transform: translate(6px, -4px) rotate(1deg); }
-  60% { transform: translate(-4px, -2px) rotate(-0.5deg); }
-  80% { transform: translate(4px, 2px) rotate(0.5deg); }
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-6px, 4px); }
+  40% { transform: translate(6px, -4px); }
+  60% { transform: translate(-4px, -2px); }
+  80% { transform: translate(4px, 2px); }
 }
 
 .animate-shake {
-  animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.35s ease-in-out both;
 }
 
 @keyframes float-damage {
@@ -100,161 +179,22 @@ body {
   animation: float-damage 1.2s ease-out forwards;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Dynamic Combat Movements & Power SFX */
 @keyframes player-lunge {
-  0% { transform: translateX(0) scale(1); }
-  40% { transform: translateX(60px) scale(1.15) rotate(5deg); }
-  60% { transform: translateX(80px) scale(1.2) rotate(8deg); }
-  100% { transform: translateX(0) scale(1); }
+  0% { transform: translateX(0); }
+  50% { transform: translateX(50px) scale(1.08); }
+  100% { transform: translateX(0); }
 }
 
 @keyframes opponent-lunge {
-  0% { transform: translateX(0) scale(1); }
-  40% { transform: translateX(-60px) scale(1.15) rotate(-5deg); }
-  60% { transform: translateX(-80px) scale(1.2) rotate(-8deg); }
-  100% { transform: translateX(0) scale(1); }
-}
-
-@keyframes beast-hit {
-  0%, 100% { transform: translateX(0) rotate(0deg); filter: brightness(1); }
-  25% { transform: translateX(12px) rotate(6deg); filter: brightness(2) saturate(2); }
-  50% { transform: translateX(-12px) rotate(-6deg); filter: brightness(0.5); }
-  75% { transform: translateX(6px) rotate(3deg); filter: brightness(1.5); }
-}
-
-@keyframes power-surge {
-  0% { transform: scale(1); filter: drop-shadow(0 0 0px #F59E0B); }
-  50% { transform: scale(1.25); filter: drop-shadow(0 0 35px #EF4444) drop-shadow(0 0 60px #F59E0B); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 0px #F59E0B); }
-}
-
-@keyframes power-beam {
-  0% { width: 0%; opacity: 0; }
-  30% { width: 100%; opacity: 1; }
-  70% { width: 100%; opacity: 1; filter: brightness(2); }
-  100% { width: 100%; opacity: 0; }
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-50px) scale(1.08); }
+  100% { transform: translateX(0); }
 }
 
 .animate-player-lunge {
-  animation: player-lunge 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: player-lunge 0.35s ease-in-out;
 }
 
 .animate-opponent-lunge {
-  animation: opponent-lunge 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: opponent-lunge 0.35s ease-in-out;
 }
-
-.animate-beast-hit {
-  animation: beast-hit 0.45s ease-in-out forwards;
-}
-
-.animate-power-surge {
-  animation: power-surge 0.8s ease-in-out forwards;
-}
-
-.animate-power-beam {
-  animation: power-beam 0.75s ease-out forwards;
-}
-
-/* Hero gradient text shimmer */
-@keyframes text-shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.animate-text-shimmer {
-  background-size: 200% auto;
-  animation: text-shimmer 4s linear infinite;
-}
-
-/* Beast card glow pulse per element */
-@keyframes glow-fire {
-  0%, 100% { box-shadow: 4px 4px 0px #080808, 0 0 20px rgba(249,115,22,0.3); }
-  50% { box-shadow: 4px 4px 0px #080808, 0 0 40px rgba(249,115,22,0.6), 0 0 60px rgba(249,115,22,0.2); }
-}
-@keyframes glow-water {
-  0%, 100% { box-shadow: 4px 4px 0px #080808, 0 0 20px rgba(59,130,246,0.3); }
-  50% { box-shadow: 4px 4px 0px #080808, 0 0 40px rgba(59,130,246,0.6), 0 0 60px rgba(59,130,246,0.2); }
-}
-@keyframes glow-dark {
-  0%, 100% { box-shadow: 4px 4px 0px #080808, 0 0 20px rgba(139,92,246,0.3); }
-  50% { box-shadow: 4px 4px 0px #080808, 0 0 40px rgba(139,92,246,0.6), 0 0 60px rgba(139,92,246,0.2); }
-}
-@keyframes glow-electric {
-  0%, 100% { box-shadow: 4px 4px 0px #080808, 0 0 20px rgba(234,179,8,0.3); }
-  50% { box-shadow: 4px 4px 0px #080808, 0 0 40px rgba(234,179,8,0.7), 0 0 60px rgba(234,179,8,0.2); }
-}
-
-.glow-fire { animation: glow-fire 2.5s ease-in-out infinite; }
-.glow-water { animation: glow-water 2.5s ease-in-out infinite; }
-.glow-dark { animation: glow-dark 2.5s ease-in-out infinite; }
-.glow-electric { animation: glow-electric 2s ease-in-out infinite; }
-
-/* Floating upward drift for beast SVGs */
-@keyframes float-beast {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
-}
-.animate-float-beast {
-  animation: float-beast 3s ease-in-out infinite;
-}
-
-/* Hero CTA neon border pulse */
-@keyframes neon-border {
-  0%, 100% { box-shadow: 4px 4px 0px #080808, 0 0 8px rgba(253,164,175,0.4); }
-  50% { box-shadow: 4px 4px 0px #080808, 0 0 20px rgba(253,164,175,0.8), 0 0 40px rgba(253,164,175,0.3); }
-}
-.animate-neon-cta {
-  animation: neon-border 2s ease-in-out infinite;
-}
-
-/* Stat counter bounce in */
-@keyframes count-up {
-  0% { transform: translateY(10px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-.animate-count-in {
-  animation: count-up 0.6s ease-out forwards;
-}
-
-/* Scanline overlay for arcade feel */
-.scanlines {
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
-  );
-  pointer-events: none;
-}
-
-/* Hero dark section gradient */
-.hero-dark-bg {
-  background: linear-gradient(135deg, #0a0a1a 0%, #0f172a 30%, #1a0a2e 60%, #0a0a1a 100%);
-}
-
-/* StakED-Style Stock/Territory Ticker */
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-ticker {
-  display: flex;
-  width: max-content;
-  animation: ticker 30s linear infinite;
-}
-
-.animate-ticker:hover {
-  animation-play-state: paused;
-}
-
