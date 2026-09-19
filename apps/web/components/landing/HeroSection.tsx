@@ -253,20 +253,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* 4. Main Hero Foreground Content (Left-Aligned, Razor-Sharp Interactive HTML) */}
       <div className="relative z-20 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-14 pb-4 flex-1 flex flex-col justify-center">
         <div className="max-w-2xl">
-          {/* Official MONAD HUNT Logo Asset with sizes prop */}
-          <div className="relative w-72 sm:w-96 h-24 sm:h-32 mb-2 -ml-2">
-            <Image
-              src="/assets/branding/monad-hunt-logo.jpg"
-              alt="MONAD HUNT Official Logo"
-              fill
-              sizes="(max-width: 640px) 288px, 384px"
-              priority
-              className="object-contain object-left mix-blend-screen filter contrast-125 brightness-110"
-            />
+          {/* Brand Eyebrow */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-[#E63946] animate-pulse" />
+            <span className="font-mono text-xs font-bold text-[#E63946] tracking-[0.25em] uppercase">
+              MONAD TESTNET • LIVE SEASON 01
+            </span>
           </div>
 
-          {/* City League Title */}
-          <div className="font-display font-black text-2xl sm:text-3xl tracking-widest uppercase text-white mb-2 flex items-center gap-3">
+          {/* Main Title */}
+          <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-none mb-3">
+            MONAD <span className="text-[#E63946] drop-shadow-[0_0_25px_rgba(230,57,70,0.6)]">HUNT</span>
+          </h1>
+
+          {/* City League Subtitle */}
+          <div className="font-display font-black text-lg sm:text-2xl tracking-widest uppercase text-[#94A3B8] mb-4 flex items-center gap-3">
             <span>CITY LEAGUE</span>
             <span className="w-8 h-0.5 bg-[#E63946]" />
             <span className="text-xs font-mono font-bold text-[#F4D35E] tracking-widest px-2.5 py-0.5 bg-[#F4D35E]/10 border border-[#F4D35E]/30 rounded">

@@ -204,15 +204,29 @@ export class RealMonadService implements IWeb3Service {
 
     let accounts: string[] = [];
     try {
-      accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[];
+      // First check if user has already granted permission to avoid redundant popups
+      accounts = (await ethereum.request({ method: "eth_accounts" })) as string[];
+      if (!accounts || accounts.length === 0) {
+        accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[];
+      }
     } catch (err: any) {
       if (err?.code === -32002) {
-        throw new Error("MetaMask request is already pending. Please approve in your wallet.");
+        throw new Error("MetaMask request is already pending. Please open the MetaMask extension icon to approve.");
       }
       if (err?.code === 4001) {
         throw new Error("MetaMask connection rejected by user.");
       }
-      throw new Error(err?.message || "Failed to connect to MetaMask.");
+      // Handle MetaMask extension internal origin error
+      if (err?.message?.includes("origin") || err?.stack?.includes("chrome-extension")) {
+        try {
+          accounts = (await ethereum.request({ method: "eth_accounts" })) as string[];
+        } catch {
+          // ignore
+        }
+      }
+      if (!accounts || accounts.length === 0) {
+        throw new Error(err?.message || "Failed to connect to MetaMask.");
+      }
     }
 
     if (!accounts || accounts.length === 0) {
