@@ -1,17 +1,27 @@
-# Multi-stage production build for Monad Hunt: City League
+# ──────────────────────────────────────────────────────────────────────────────
+# MONAD HUNT: CITY LEAGUE — Production Docker Build
+# Multi-stage build for minimal image size with standalone Next.js output
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Stage 1: Base
 FROM node:20-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
-# Stage 1: Dependencies
+# Stage 2: Dependencies (cached layer — only rebuilds when package files change)
 FROM base AS deps
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json package-lock.json* .npmrc* ./
+# Install with error-only logging to suppress deprecation noise
+RUN npm ci --loglevel=error --no-fund --no-audit
 
-# Stage 2: Builder
+# Stage 3: Builder
 FROM base AS builder
+WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Enable standalone output for Docker (creates self-contained server.js)
+ENV NEXT_STANDALONE=true
 
 ARG NEXT_PUBLIC_MONAD_CHAIN_ID=10143
 ARG NEXT_PUBLIC_MONAD_RPC_URL=https://testnet-rpc.monad.xyz/
@@ -30,7 +40,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-# Stage 3: Production Runner
+# Stage 4: Production Runner (minimal, no dev deps)
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -49,5 +59,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:3000/api/health || exit 1
 
 CMD ["node", "server.js"]

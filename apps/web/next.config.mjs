@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // NOTE: output:"standalone" is enabled only for Docker/production builds.
-  // Remove the comment below and uncomment the line for Docker deployment:
-  // output: "standalone",
+  // standalone output is enabled only inside Docker (NEXT_STANDALONE=true)
+  // This prevents the dev server from breaking static asset serving
+  ...(process.env.NEXT_STANDALONE === "true" ? { output: "standalone" } : {}),
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [],
