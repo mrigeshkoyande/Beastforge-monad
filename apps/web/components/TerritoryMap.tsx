@@ -3,22 +3,19 @@
 import React, { useState } from "react";
 import { TerritoryWarState } from "@/game/EvolutionSystem";
 import { Beast } from "@/data/mockData";
-import { BeastSvg } from "./BeastSvg";
 import { soundFX } from "@/game/SoundFX";
 import {
   MapPin,
   Swords,
   Shield,
   Trophy,
-  Crown,
-  Sparkles,
   Filter,
   Flame,
-  TrendingUp,
-  Activity,
-  ChevronRight,
-  Compass,
+  Radio,
   Navigation,
+  ExternalLink,
+  ChevronRight,
+  Zap,
 } from "lucide-react";
 import { TerritoryDetailModal } from "./TerritoryDetailModal";
 
@@ -45,8 +42,26 @@ export const TerritoryMap: React.FC<TerritoryMapProps> = ({
       ? territories
       : territories.filter((t) => t.zone.toLowerCase().includes(zoneFilter.toLowerCase()));
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "LIVE ARENA":
+        return "bg-mh-live/20 border-mh-live text-mh-live animate-pulse";
+      case "UNDER ATTACK":
+        return "bg-mh-live/20 border-mh-live text-mh-live";
+      case "CONTESTED":
+        return "bg-mh-reward/20 border-mh-reward text-mh-reward";
+      case "DEFENDING":
+        return "bg-mh-defend/20 border-mh-defend text-mh-defend";
+      case "DOMINATED":
+        return "bg-mh-primary/20 border-mh-primary text-mh-primaryGlow";
+      case "STABLE":
+      default:
+        return "bg-mh-card border-mh-border text-mh-silver";
+    }
+  };
+
   return (
-    <div className="py-8 max-w-7xl mx-auto px-4">
+    <div className="py-6 max-w-7xl mx-auto px-4">
       {/* Detail Modal */}
       {selectedTerritory && (
         <TerritoryDetailModal
@@ -66,171 +81,143 @@ export const TerritoryMap: React.FC<TerritoryMapProps> = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-arcade-coral rounded-lg border-2 border-arcade-black text-[11px] font-black uppercase tracking-wider shadow-arcade-sm mb-2">
-            <Flame className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-            REAL-WORLD MUMBAI CONQUEST
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-mh-card rounded border border-mh-border text-xs font-mono font-bold text-mh-reward mb-2">
+            <Flame className="w-3.5 h-3.5 text-mh-reward" />
+            12 MUMBAI TERRITORIES · SEASON 01
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-arcade-black tracking-tight leading-none">
-            MUMBAI <span className="text-arcade-electric">TERRITORY WAR</span>
+          <h2 className="font-display text-4xl md:text-5xl font-black text-white uppercase tracking-wider leading-none">
+            MUMBAI <span className="text-mh-primary">TACTICAL MAP</span>
           </h2>
+          <p className="text-mh-text2 text-sm mt-1 max-w-xl">
+            Every arena battle shifts territorial influence in real time. Defend strongholds or conquer rival zones.
+          </p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          {/* Toggle Map View vs List View */}
-          <div className="flex items-center bg-white p-1 rounded-xl border-3 border-arcade-black shadow-arcade-sm">
+        <div className="flex items-center gap-3">
+          {/* Map vs List View Switch */}
+          <div className="flex items-center bg-mh-navy p-1 rounded-lg border border-mh-border">
             <button
               onClick={() => {
                 soundFX.playClick();
                 setViewMode("MAP");
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded text-xs font-mono font-bold uppercase transition-all ${
                 viewMode === "MAP"
-                  ? "bg-arcade-electric text-white shadow-arcade-sm"
-                  : "text-arcade-black hover:bg-slate-100"
+                  ? "bg-mh-primary text-white"
+                  : "text-mh-text2 hover:text-white"
               }`}
             >
-              <Navigation className="w-3.5 h-3.5" />
-              LIVE MUMBAI MAP
+              <Navigation className="w-3.5 h-3.5 inline mr-1" />
+              SATELLITE MAP
             </button>
             <button
               onClick={() => {
                 soundFX.playClick();
                 setViewMode("LIST");
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded text-xs font-mono font-bold uppercase transition-all ${
                 viewMode === "LIST"
-                  ? "bg-arcade-electric text-white shadow-arcade-sm"
-                  : "text-arcade-black hover:bg-slate-100"
+                  ? "bg-mh-primary text-white"
+                  : "text-mh-text2 hover:text-white"
               }`}
             >
-              <Filter className="w-3.5 h-3.5" />
-              GRID VIEW
+              <Filter className="w-3.5 h-3.5 inline mr-1" />
+              TACTICAL LIST
             </button>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border-2 border-arcade-black text-[11px] font-black uppercase text-arcade-black shadow-arcade-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>ON-CHAIN: Territory.sol</span>
           </div>
         </div>
       </div>
 
-      {/* Real-World Interactive Mumbai Radar Canvas */}
+      {/* Satellite Map View */}
       {viewMode === "MAP" && (
-        <div className="arcade-card bg-slate-900 border-4 border-arcade-black p-4 md:p-6 mb-8 relative overflow-hidden shadow-arcade-xl">
-          {/* Top Canvas Bar */}
+        <div className="bg-mh-navy border border-mh-border rounded-xl p-4 md:p-6 mb-8 relative overflow-hidden shadow-2xl">
+          {/* Map Top Bar */}
           <div className="flex items-center justify-between text-white mb-4 z-10 relative">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-emerald-500 text-black text-[10px] font-black rounded uppercase tracking-wider flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />
-                GPS SATELLITE RADAR
+              <span className="px-2.5 py-0.5 bg-mh-live/20 border border-mh-live/40 text-mh-live text-[10px] font-mono font-bold rounded uppercase flex items-center gap-1.5 animate-pulse">
+                <Radio className="w-3 h-3" /> LIVE RADAR
               </span>
-              <span className="text-xs font-bold text-slate-300">
-                19.0760° N, 72.8777° E • Greater Mumbai Metropolitan Area
+              <span className="text-xs font-mono text-mh-text2 hidden sm:inline">
+                19.0760° N, 72.8777° E • Greater Mumbai Peninsula
               </span>
             </div>
 
-            <div className="text-xs font-black text-amber-400">
-              CLICK ANY PIN TO CHALLENGE & CONQUER
+            <div className="text-xs font-mono text-mh-reward font-bold">
+              CLICK PIN TO SELECT TERRITORY
             </div>
           </div>
 
-          {/* Map Vector Stage with Coastline & Arabian Sea */}
-          <div className="relative w-full h-[420px] md:h-[500px] bg-[#0A192F] rounded-2xl border-3 border-white/20 overflow-hidden relative select-none">
-            {/* Arabian Sea Shimmer Effect */}
-            <div className="absolute inset-0 bg-[radial-gradient(#1E3A8A_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
+          {/* SVG Map Canvas */}
+          <div className="relative w-full h-[480px] md:h-[540px] bg-[#07090E] rounded-xl border border-mh-border overflow-hidden select-none">
+            {/* Grid Lines */}
+            <div className="absolute inset-0 bg-[radial-gradient(#232B3B_1px,transparent_1px)] [background-size:24px_24px] opacity-60" />
 
-            {/* Stylized Mumbai Coastline Shape (SVG) */}
+            {/* Stylized Mumbai Peninsula SVG */}
             <svg
-              className="absolute inset-0 w-full h-full pointer-events-none opacity-30"
+              className="absolute inset-0 w-full h-full pointer-events-none opacity-40"
               viewBox="0 0 1000 600"
               preserveAspectRatio="none"
             >
-              {/* Landmass silhouette */}
               <path
-                d="M300,0 C350,120 400,200 480,260 C520,320 460,400 400,480 C360,540 320,580 280,600 L1000,600 L1000,0 Z"
-                fill="#1E293B"
-                stroke="#38BDF8"
-                strokeWidth="3"
-                strokeDasharray="6 4"
+                d="M 150,0 Q 250,80 320,160 T 360,320 T 310,460 T 260,560 L 320,600 L 400,600 Q 420,480 440,360 T 480,200 T 520,0 Z"
+                fill="#161B26"
+                stroke="#836EF9"
+                strokeWidth="2"
+                strokeDasharray="4 4"
               />
-              {/* Bandra-Worli Sea Link Bridge Path */}
               <path
-                d="M260,310 Q280,360 300,400"
-                stroke="#FACC15"
-                strokeWidth="4"
-                strokeDasharray="4 2"
+                d="M 460,180 Q 560,240 680,280 T 780,420 T 740,600 L 850,600 L 850,0 Z"
+                fill="#10141D"
+                stroke="#232B3B"
+                strokeWidth="1.5"
               />
             </svg>
 
-            {/* Water label */}
-            <div className="absolute bottom-6 left-6 text-slate-500 font-mono text-xs font-black tracking-widest uppercase">
-              🌊 Arabian Sea Coastline
-            </div>
-
-            {/* Sea Link Tag */}
-            <div className="absolute top-[52%] left-[16%] text-[10px] font-black text-yellow-400/80 bg-black/60 px-2 py-0.5 rounded border border-yellow-400/40">
-              🌉 Bandra-Worli Sea Link
-            </div>
-
-            {/* Real-World Territory Pins */}
-            {territories.map((territory) => {
-              const isSelected = selectedTerritory?.id === territory.id;
-              const isHovered = hoveredTerritory?.id === territory.id;
-              const isUserOwner =
-                territory.currentOwner.includes("YOU") || territory.currentOwner.includes("0x71C9");
+            {/* Territory Interactive Hotspots */}
+            {filteredTerritories.map((t) => {
+              const isHovered = hoveredTerritory?.id === t.id;
+              const isLive = t.status === "LIVE ARENA" || t.status === "UNDER ATTACK";
 
               return (
                 <div
-                  key={territory.id}
+                  key={t.id}
                   style={{
-                    left: `${territory.mapCoordinates.x}%`,
-                    top: `${territory.mapCoordinates.y}%`,
+                    left: `${t.mapCoordinates.x}%`,
+                    top: `${t.mapCoordinates.y}%`,
                   }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-20"
                   onClick={() => {
                     soundFX.playClick();
-                    setSelectedTerritory(territory);
+                    setSelectedTerritory(t);
                   }}
-                  onMouseEnter={() => setHoveredTerritory(territory)}
+                  onMouseEnter={() => setHoveredTerritory(t)}
                   onMouseLeave={() => setHoveredTerritory(null)}
                 >
-                  {/* Outer Pulsing Beacon */}
-                  <div
-                    className={`absolute -inset-3 rounded-full opacity-75 animate-ping pointer-events-none ${
-                      isUserOwner ? "bg-emerald-400" : "bg-arcade-coral"
-                    }`}
-                  />
+                  {/* Ping Animation for Live Arenas */}
+                  {isLive && (
+                    <div className="absolute -inset-2 bg-mh-live rounded-full animate-ping opacity-75 pointer-events-none" />
+                  )}
 
-                  {/* Pin Node */}
+                  {/* Pin Shape */}
                   <div
-                    className={`relative w-12 h-12 md:w-14 md:h-14 rounded-2xl border-3 border-arcade-black flex flex-col items-center justify-center shadow-arcade transition-all group-hover:scale-125 group-hover:z-30 ${
-                      isUserOwner
-                        ? "bg-emerald-400 text-black ring-4 ring-emerald-300"
-                        : isSelected
-                        ? "bg-arcade-yellow text-black ring-4 ring-white"
-                        : "bg-white text-black"
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center border-2 transition-all transform group-hover:scale-125 shadow-lg ${
+                      isLive
+                        ? "bg-mh-live border-white text-white"
+                        : t.status === "CONTESTED"
+                        ? "bg-mh-reward border-black text-black"
+                        : "bg-mh-card border-mh-primary text-mh-primaryGlow"
                     }`}
                   >
-                    <BeastSvg id={territory.guardian} className="w-8 h-8 pointer-events-none" />
-                    <span className="text-[8px] font-black uppercase tracking-tighter leading-none mt-0.5">
-                      Lv {territory.guardianLevel}
-                    </span>
+                    <MapPin className="w-5 h-5" />
                   </div>
 
-                  {/* Pin Title Tooltip Tag */}
-                  <div
-                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-1.5 px-2.5 py-1 rounded-lg border-2 border-arcade-black text-[10px] font-black uppercase whitespace-nowrap shadow-arcade-sm pointer-events-none transition-all ${
-                      isUserOwner
-                        ? "bg-emerald-300 text-black"
-                        : "bg-arcade-yellow text-black"
-                    }`}
-                  >
-                    <div className="leading-tight">{territory.name}</div>
-                    <div className="text-[8px] text-black/70 flex items-center gap-1 font-bold">
-                      <span>{territory.landmark}</span>
-                      <span>•</span>
-                      <span className="text-red-600 font-black">{territory.rewardMultiplier}x</span>
+                  {/* Tooltip Label */}
+                  <div className="absolute top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-mh-navy/95 border border-mh-border px-2.5 py-1 rounded shadow-xl text-center pointer-events-none transition-all group-hover:opacity-100 z-30">
+                    <div className="font-display font-black text-xs uppercase text-white tracking-wide">
+                      {t.name}
+                    </div>
+                    <div className="text-[10px] font-mono text-mh-reward">
+                      {t.status} · {t.currentOwner}
                     </div>
                   </div>
                 </div>
@@ -240,124 +227,60 @@ export const TerritoryMap: React.FC<TerritoryMapProps> = ({
         </div>
       )}
 
-      {/* Grid View / Territory Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredTerritories.map((territory) => {
-          const isUserOwner =
-            territory.currentOwner.includes("YOU") || territory.currentOwner.includes("0x71C9");
-
-          return (
+      {/* Tactical List View (Great for Mobile & Quick Glance) */}
+      {viewMode === "LIST" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {filteredTerritories.map((t) => (
             <div
-              key={territory.id}
-              className={`arcade-card p-5 relative overflow-hidden transition-all flex flex-col justify-between ${
-                isUserOwner
-                  ? "bg-arcade-mint/25 border-emerald-600 ring-2 ring-emerald-500"
-                  : territory.status === "CONTESTED"
-                  ? "bg-warm-50 border-arcade-coral"
-                  : "bg-white"
-              }`}
+              key={t.id}
+              onClick={() => {
+                soundFX.playClick();
+                setSelectedTerritory(t);
+              }}
+              className="mh-card p-5 cursor-pointer hover:border-mh-primary/60 transition-all shadow-md group"
             >
-              {/* Status Header Badge */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-md border-2 border-arcade-black text-[10px] font-black uppercase ${territory.badgeBg}`}>
-                    {territory.zone}
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <span className="text-[10px] font-mono text-mh-text3 uppercase block">
+                    {t.zone} · {t.district}
                   </span>
-                  <span className="text-[11px] font-black text-arcade-black/60">
-                    ID #{territory.numericId}
-                  </span>
+                  <h3 className="font-display text-xl font-black uppercase text-white group-hover:text-mh-primary transition-colors">
+                    {t.name}
+                  </h3>
                 </div>
+                <span className={`mh-badge text-[10px] ${getStatusBadge(t.status)}`}>
+                  <span>{t.status}</span>
+                </span>
+              </div>
 
-                <div className="flex items-center gap-1 px-2 py-0.5 bg-arcade-yellow rounded border-2 border-arcade-black text-[10px] font-black uppercase">
-                  <TrendingUp className="w-3 h-3" />
-                  {territory.rewardMultiplier}x REWARD
+              <p className="text-xs text-mh-text2 mb-4 line-clamp-2">
+                {t.description}
+              </p>
+
+              <div className="bg-[#07090E] p-2.5 rounded border border-mh-border text-xs font-mono space-y-1.5 mb-4">
+                <div className="flex justify-between text-mh-text2">
+                  <span>CONTROLLING CREW</span>
+                  <span className="text-white font-bold">{t.currentOwner}</span>
+                </div>
+                <div className="flex justify-between text-mh-text2">
+                  <span>GUARDIAN BEAST</span>
+                  <span className="text-mh-primary font-bold">{t.guardian} (LVL {t.guardianLevel})</span>
+                </div>
+                <div className="flex justify-between text-mh-text2">
+                  <span>WIN STREAK</span>
+                  <span className="text-mh-reward font-bold">{t.winStreak} STREAK ({t.rewardMultiplier}x)</span>
                 </div>
               </div>
 
-              {/* Territory Name & Real-World Landmark */}
-              <div className="mb-3">
-                <div className="text-xl font-black text-arcade-black tracking-tight leading-none mb-1">
-                  {territory.name}
-                </div>
-                <div className="text-xs font-bold text-arcade-electric flex items-center gap-1 mb-1">
-                  <MapPin className="w-3 h-3 text-red-500 shrink-0" />
-                  <span>{territory.landmark}</span>
-                </div>
-                <div className="text-xs font-bold text-arcade-black/60 line-clamp-1">
-                  {territory.description}
-                </div>
-              </div>
-
-              {/* Tactical Stats Matrix */}
-              <div className="bg-warm-100 rounded-xl border-2 border-arcade-black p-3 mb-4 space-y-2 text-xs font-bold">
-                <div className="flex items-center justify-between">
-                  <span className="text-arcade-black/60">Zone Guardian:</span>
-                  <span className="font-black text-arcade-black flex items-center gap-1">
-                    {territory.guardian}
-                    <span className="text-[10px] text-arcade-electric">(Lv {territory.guardianLevel})</span>
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-arcade-black/60">Territory Lord:</span>
-                  <span className="font-black text-arcade-black truncate max-w-[140px]">
-                    {isUserOwner ? "👑 YOU (Defending)" : territory.currentOwner.split(" ")[0]}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-arcade-black/60">Fortification Armor:</span>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span
-                        key={i}
-                        className={`w-2.5 h-2.5 rounded-sm border border-arcade-black ${
-                          i < territory.defenseLevel ? "bg-emerald-500" : "bg-slate-200"
-                        }`}
-                      />
-                    ))}
-                    <span className="text-[10px] font-black text-emerald-800 ml-1">
-                      Lv {territory.defenseLevel}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-arcade-black/15">
-                  <span className="text-arcade-black/60">Win Streak:</span>
-                  <span className="font-black text-amber-600 flex items-center gap-0.5">
-                    <Flame className="w-3.5 h-3.5 fill-amber-500" />
-                    {territory.winStreak} Streak
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2 mt-auto">
-                <button
-                  onClick={() => {
-                    soundFX.playClick();
-                    setSelectedTerritory(territory);
-                  }}
-                  className="arcade-btn py-2 px-3 bg-white text-arcade-black rounded-xl text-xs font-black flex items-center justify-center gap-1"
-                >
-                  DETAILS <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={() => {
-                    soundFX.playAttack();
-                    onChallengeTerritory(territory);
-                  }}
-                  className="arcade-btn py-2 px-3 bg-arcade-coral text-arcade-black rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:scale-105"
-                >
-                  <Swords className="w-3.5 h-3.5" />
-                  ATTACK ({territory.entryFee})
-                </button>
-              </div>
+              <button className="mh-btn w-full text-xs py-2">
+                <span className="flex items-center justify-center gap-1.5">
+                  <Swords className="w-3.5 h-3.5" /> ENTER PROVING GROUNDS
+                </span>
+              </button>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
