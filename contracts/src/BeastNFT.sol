@@ -6,7 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title BeastNFT
- * @notice ERC-721 token representing AI Beasts in MONAD HUNT.
+ * @notice ERC-721 token representing AI Beasts in MONAD HUNT: CITY LEAGUE.
+ * Includes deterministic starter beast minting and combat progression.
  * Beasts remain safely in the player's wallet at all times.
  */
 contract BeastNFT is ERC721URIStorage, Ownable {
@@ -14,12 +15,14 @@ contract BeastNFT is ERC721URIStorage, Ownable {
 
     struct BeastAttributes {
         string name;
-        uint8 rarity; // 0: COMMON, 1: RARE, 2: EPIC, 3: LEGENDARY
+        uint8 beastType; // 0: FIRE, 1: WATER, 2: ELECTRIC, 3: EARTH, 4: SHADOW, 5: CYBER
+        uint8 rarity;    // 0: COMMON, 1: RARE, 2: EPIC, 3: LEGENDARY
         uint8 level;
         uint16 attack;
         uint16 defense;
         uint16 speed;
         uint16 energy;
+        uint32 xp;
         uint32 wins;
         uint32 losses;
     }
@@ -27,7 +30,11 @@ contract BeastNFT is ERC721URIStorage, Ownable {
     // Mapping from tokenId to on-chain BeastAttributes
     mapping(uint256 => BeastAttributes) public beasts;
 
-    // Authorized battle recorder contract (e.g. Arena.sol)
+    // Free starter tracking (1 per wallet)
+    mapping(address => bool) public hasMintedStarter;
+    mapping(address => uint256) public playerStarterTokenId;
+
+    // Authorized battle recorder contract (e.g. HuntCore.sol)
     address public battleRecorder;
 
     event BeastMinted(
@@ -36,6 +43,13 @@ contract BeastNFT is ERC721URIStorage, Ownable {
         string name,
         uint8 rarity,
         uint8 level
+    );
+
+    event StarterMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        string name,
+        uint8 beastType
     );
 
     event BeastLeveledUp(uint256 indexed tokenId, uint8 newLevel, uint32 wins);
@@ -57,11 +71,54 @@ contract BeastNFT is ERC721URIStorage, Ownable {
     }
 
     /**
-     * @notice Mints a new Beast NFT with attributes.
+     * @notice Mints one free starter Beast per wallet with deterministic baseline stats.
+     */
+    function mintStarter(address to) external returns (uint256) {
+        require(to != address(0), "Cannot mint to zero address");
+        require(!hasMintedStarter[to], "Starter beast already claimed for this wallet");
+
+        uint256 tokenId = _nextTokenId++;
+        hasMintedStarter[to] = true;
+        playerStarterTokenId[to] = tokenId;
+
+        // Deterministic starter selection based on tokenId and recipient address
+        uint8 beastType = uint8(uint256(keccak256(abi.encodePacked(tokenId, to, "STARTER_TYPE"))) % 4); // Fire, Water, Electric, Earth
+        
+        string memory name = "Emberwyrm";
+        if (beastType == 1) name = "Tidewarden";
+        else if (beastType == 2) name = "Voltclaw";
+        else if (beastType == 3) name = "Terrashell";
+
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, string(abi.encodePacked("https://monadhunt.xyz/metadata/beasts/", _toString(tokenId))));
+
+        beasts[tokenId] = BeastAttributes({
+            name: name,
+            beastType: beastType,
+            rarity: 1, // RARE starter
+            level: 1,
+            attack: 45 + uint16(beastType * 3),
+            defense: 40 + uint16((3 - beastType) * 3),
+            speed: 50,
+            energy: 100,
+            xp: 0,
+            wins: 0,
+            losses: 0
+        });
+
+        emit StarterMinted(tokenId, to, name, beastType);
+        emit BeastMinted(tokenId, to, name, 1, 1);
+
+        return tokenId;
+    }
+
+    /**
+     * @notice Mints a new custom Beast NFT with attributes (Owner / Admin only).
      */
     function mintBeast(
         address to,
         string memory name,
+        uint8 beastType,
         uint8 rarity,
         uint8 level,
         uint16 attack,
@@ -79,12 +136,14 @@ contract BeastNFT is ERC721URIStorage, Ownable {
 
         beasts[tokenId] = BeastAttributes({
             name: name,
+            beastType: beastType,
             rarity: rarity,
             level: level > 0 ? level : 1,
             attack: attack,
             defense: defense,
             speed: speed,
             energy: energy,
+            xp: 0,
             wins: 0,
             losses: 0
         });
@@ -93,7 +152,7 @@ contract BeastNFT is ERC721URIStorage, Ownable {
     }
 
     /**
-     * @notice Records combat victory or defeat. Only Arena contract or Owner.
+     * @notice Records combat victory or defeat. Only HuntCore contract or Owner.
      */
     function recordBattle(
         uint256 tokenId,
@@ -105,20 +164,41 @@ contract BeastNFT is ERC721URIStorage, Ownable {
 
         if (won) {
             beast.wins += 1;
+            beast.xp += 100;
             if (levelUpCount > 0) {
                 beast.level += levelUpCount;
-                beast.attack += uint16(levelUpCount * 2);
+                beast.attack += uint16(levelUpCount * 3);
                 beast.defense += uint16(levelUpCount * 2);
                 beast.speed += uint16(levelUpCount * 1);
                 emit BeastLeveledUp(tokenId, beast.level, beast.wins);
             }
         } else {
             beast.losses += 1;
+            beast.xp += 25;
         }
     }
 
     function getBeast(uint256 tokenId) external view returns (BeastAttributes memory) {
         require(_ownerOf(tokenId) != address(0), "Beast does not exist");
         return beasts[tokenId];
+    }
+
+    function _toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }
