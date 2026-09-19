@@ -10,7 +10,12 @@ export const viewport: Viewport = {
   themeColor: "#05070B",
 };
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://monad-hunt.vercel.app");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "MONAD HUNT | City League — Catch. Stake. Battle. Conquer.",
   description:
     "MONAD HUNT: CITY LEAGUE — A competitive cyberpunk on-chain beast arena where victories earn real NFT ownership. Powered by Monad Testnet.",
