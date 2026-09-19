@@ -6,12 +6,11 @@ import { Footer } from "@/components/Footer";
 import { HowItWorks } from "@/components/HowItWorks";
 import { BeastCard } from "@/components/BeastCard";
 import { BeastDetailModal } from "@/components/BeastDetailModal";
-import { BeastSvg } from "@/components/BeastSvg";
 import { TerritoryMap } from "@/components/TerritoryMap";
 import { ArenaLobby } from "@/components/ArenaLobby";
 import { BattleScreen } from "@/components/BattleScreen";
 import { VictoryDefeatModal } from "@/components/VictoryDefeatModal";
-import { TransactionModal } from "@/components/TransactionModal";
+import { LiveSettlementConsole } from "@/components/LiveSettlementConsole";
 import { Leaderboard } from "@/components/Leaderboard";
 import { PlayerProfile } from "@/components/PlayerProfile";
 import { EvolutionModal } from "@/components/EvolutionModal";
@@ -24,7 +23,7 @@ import {
   Beast,
   LeaderboardEntry,
 } from "@/data/mockData";
-import { INITIAL_TERRITORY_WAR, INITIAL_ACHIEVEMENTS } from "@/data/warData";
+import { INITIAL_TERRITORY_WAR, INITIAL_ACHIEVEMENTS, CREWS } from "@/data/warData";
 import {
   TerritoryWarState,
   AchievementItem,
@@ -32,11 +31,10 @@ import {
   BeastAbility,
   calculatePostBattleProgression,
 } from "@/game/EvolutionSystem";
-import { ChainStatusBar } from "@/components/ChainStatusBar";
-import { HeroRadarCanvas } from "@/components/HeroRadarCanvas";
 import { soundFX } from "@/game/SoundFX";
 import { getWeb3Service, TxProgress, Web3Mode } from "@/lib/web3Service";
-import { Swords, Compass, Sparkles, ShieldCheck, Zap, Trophy, Flame, Award, Tv, ArrowRight } from "lucide-react";
+import { Swords, MapPin, Sparkles, ShieldCheck, Zap, Trophy, Flame, Award, Radio, ArrowRight, Shield, Activity } from "lucide-react";
+import { CombatAction } from "@/game/BattleAction";
 
 export default function Home() {
   const [currentTab, setCurrentTab] = useState<string>("landing");
@@ -44,15 +42,13 @@ export default function Home() {
   const [walletConnected, setWalletConnected] = useState<boolean>(false);
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [monBalance, setMonBalance] = useState<string>("0.00 MON");
-
-  // On-chain telemetry proof state
-  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
-  const [lastLatencyMs, setLastLatencyMs] = useState<number | null>(null);
+  const [userCrewId, setUserCrewId] = useState<number>(1);
+  const [hasClaimedStarter, setHasClaimedStarter] = useState<boolean>(false);
 
   // Active game selections
   const [playerBeast, setPlayerBeast] = useState<Beast>(MOCK_BEASTS[0]); // Emberwyrm
   const [opponentBeast, setOpponentBeast] = useState<Beast>(MOCK_BEASTS[1]); // Tidewarden
-  const [selectedTerritory, setSelectedTerritory] = useState<TerritoryWarState>(INITIAL_TERRITORY_WAR[0]); // Andheri Arena
+  const [selectedTerritory, setSelectedTerritory] = useState<TerritoryWarState>(INITIAL_TERRITORY_WAR[2]); // Powai Tech Hub
 
   // Dynamic game state
   const [territories, setTerritories] = useState<TerritoryWarState[]>(INITIAL_TERRITORY_WAR);
@@ -62,7 +58,15 @@ export default function Home() {
 
   // Battle states
   const [isFighting, setIsFighting] = useState<boolean>(false);
-  const [battleResult, setBattleResult] = useState<{ won: boolean } | null>(null);
+  const [battleResultData, setBattleResultData] = useState<{
+    won: boolean;
+    ratingBefore: number;
+    ratingAfter: number;
+    ratingDelta: number;
+    influenceDelta: number;
+    crewPoints: number;
+    streak: number;
+  } | null>(null);
   const [inspectBeast, setInspectBeast] = useState<Beast | null>(null);
 
   // Evolution & Level-Up Modal
@@ -72,8 +76,9 @@ export default function Home() {
     unlockedAbility: BeastAbility | null;
   } | null>(null);
 
-  // Web3 Transaction Modal state
+  // Web3 Live Settlement Console state
   const [txProgress, setTxProgress] = useState<TxProgress | null>(null);
+  const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
 
   const activeMode: Web3Mode = isDemoMode ? "DEMO" : "REAL";
   const web3Service = getWeb3Service(activeMode);
@@ -88,68 +93,88 @@ export default function Home() {
 
     try {
       setTxProgress({
-        status: "WAITING_SIGNATURE",
-        title: "Connecting to MetaMask...",
+        status: "SIGN",
+        title: "Connecting to Monad Testnet via MetaMask...",
       });
+      setIsConsoleOpen(true);
 
-      // Always invoke the real Web3 service so MetaMask prompt pops up directly
       const realService = getWeb3Service("REAL");
       const { address, balance } = await realService.connectWallet();
       setWalletConnected(true);
       setWalletAddress(address);
       setMonBalance(balance);
-      setIsDemoMode(false); // Seamlessly switch to LIVE mode on real wallet connection!
+      setIsDemoMode(false); // Seamlessly switch to live on connection
       setTxProgress({
-        status: "CONFIRMED",
+        status: "SETTLED",
         title: `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`,
       });
-      setTimeout(() => setTxProgress(null), 1200);
+      setTimeout(() => {
+        setIsConsoleOpen(false);
+        setTxProgress(null);
+      }, 1000);
     } catch (err: unknown) {
       const e = err as Error;
       setTxProgress({
         status: "ERROR",
-        title: "MetaMask Connection",
-        errorMessage: e.message || "Could not connect to MetaMask.",
+        title: "MetaMask Connection Failed",
+        errorMessage: e.message || "Could not connect to wallet.",
       });
     }
   };
 
-  const handleStartBattle = async () => {
-    soundFX.playAttack();
-    const startTime = Date.now();
+  const handleMintStarter = async () => {
+    soundFX.playClick();
+    setIsConsoleOpen(true);
     try {
-      // Execute on-chain entry stake
-      const result = await web3Service.enterArena(
-        `battle_${Date.now()}`,
-        playerBeast.tokenId,
-        selectedTerritory.numericId,
-        "0.10",
+      const result = await web3Service.mintStarterBeast(
+        walletAddress || "0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F",
         (p) => setTxProgress(p)
       );
-      const elapsed = Date.now() - startTime;
-      if (!isDemoMode && result.txHash) {
-        setLastTxHash(result.txHash);
-        setLastLatencyMs(elapsed);
-      }
+      setHasClaimedStarter(true);
       setTimeout(() => {
+        setIsConsoleOpen(false);
         setTxProgress(null);
-        setIsFighting(true);
-        setCurrentTab("arena");
-      }, 800);
+      }, 1200);
     } catch (err: unknown) {
       const e = err as Error;
       setTxProgress({
         status: "ERROR",
-        title: "Arena Entry Failed",
-        errorMessage: e.message || "Failed to enter arena.",
+        title: "Starter Mint Failed",
+        errorMessage: e.message,
       });
     }
   };
 
-  const handleBattleEnd = async (won: boolean) => {
+  const handleJoinCrew = async (crewId: number) => {
+    soundFX.playClick();
+    setIsConsoleOpen(true);
+    try {
+      await web3Service.joinCrew(crewId, (p) => setTxProgress(p));
+      setUserCrewId(crewId);
+      setTimeout(() => {
+        setIsConsoleOpen(false);
+        setTxProgress(null);
+      }, 1200);
+    } catch (err: unknown) {
+      const e = err as Error;
+      setTxProgress({
+        status: "ERROR",
+        title: "Crew Join Failed",
+        errorMessage: e.message,
+      });
+    }
+  };
+
+  const handleStartBattle = () => {
+    soundFX.playAttack();
+    setIsFighting(true);
+    setCurrentTab("arena");
+  };
+
+  const handleBattleEnd = async (won: boolean, _log: string[], moves: CombatAction[]) => {
     setIsFighting(false);
 
-    // Calculate progression
+    // 1. Calculate progression
     const progression = calculatePostBattleProgression(
       playerBeast.level,
       playerBeast.xp,
@@ -158,7 +183,7 @@ export default function Home() {
       selectedTerritory.rewardMultiplier
     );
 
-    // Update Player Beast XP and Level
+    // Update Player Beast XP
     const updatedBeast: Beast = {
       ...playerBeast,
       level: progression.newLevel,
@@ -169,48 +194,67 @@ export default function Home() {
     };
     setPlayerBeast(updatedBeast);
 
-    if (won) {
-      const startTime = Date.now();
-      try {
-        const resolveRes = await web3Service.resolveBattle(
-          {
-            battleId: `battle_${Date.now()}`,
-            winner: walletAddress,
-            rewardAmount: (parseFloat(selectedTerritory.baseReward) * selectedTerritory.rewardMultiplier).toFixed(2),
-            nonce: Math.floor(Math.random() * 100000),
-            deadline: Math.floor(Date.now() / 1000) + 3600,
-            signature: "0x" + "a".repeat(130),
-          },
-          (p) => setTxProgress(p)
-        );
-        const elapsed = Date.now() - startTime;
-        if (!isDemoMode && resolveRes.txHash) {
-          setLastTxHash(resolveRes.txHash);
-          setLastLatencyMs(elapsed);
-        }
+    const bId = `battle_${Date.now()}`;
+    const ratingDelta = won ? 24 : 14;
+    const influenceDelta = won ? 16 : 0;
+    const crewPoints = won ? 49 : 0;
+    const ratingBefore = 1000;
+    const ratingAfter = won ? ratingBefore + ratingDelta : ratingBefore - ratingDelta;
 
-        // 1. Capture Territory & add battle history
+    setIsConsoleOpen(true);
+    try {
+      // 2. Request EIP-712 settlement signature from server oracle
+      setTxProgress({
+        status: "SIGN",
+        title: "Verifying battle moves & generating EIP-712 signature...",
+      });
+
+      const serverRes = await fetch("/api/settle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          battleId: bId,
+          playerAddress: walletAddress || "0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F",
+          opponentAddress: "0x0000000000000000000000000000000000000000",
+          playerBeastId: playerBeast.id,
+          opponentBeastId: opponentBeast.id,
+          moves: moves.length > 0 ? moves : ["ATTACK", "SPECIAL"],
+          territoryId: selectedTerritory.numericId || 1,
+        }),
+      });
+
+      const serverData = await serverRes.json();
+      if (!serverRes.ok) throw new Error(serverData.error || "Settlement signature error");
+
+      // 3. Settle on-chain using web3Service
+      const metrics = await web3Service.settleBattle(
+        serverData.battleResult,
+        serverData.signature,
+        (p) => setTxProgress(p)
+      );
+
+      // 4. Update local state upon settlement
+      if (won) {
         setTerritories((prev) =>
           prev.map((t) =>
             t.id === selectedTerritory.id
               ? {
                   ...t,
-                  currentOwner: "JAYRAJ (YOU)",
+                  currentOwner: CREWS.find((c) => c.id === userCrewId)?.name || "Neon Vipers",
                   guardian: playerBeast.name,
                   conqueredCount: t.conqueredCount + 1,
                   winStreak: t.winStreak + 1,
-                  defenseLevel: Math.min(5, t.defenseLevel + 1),
-                  status: "FORTIFIED",
+                  status: "DEFENDING",
                   recentBattles: [
                     {
                       id: `battle-${Date.now()}`,
                       timestamp: "Just now",
-                      attacker: "JAYRAJ (YOU)",
+                      attacker: "YOU (HUNTER)",
                       attackerBeast: playerBeast.name,
                       defender: t.guardian,
                       defenderBeast: t.guardian,
                       won: true,
-                      rewardEarned: `${(parseFloat(t.baseReward) * t.rewardMultiplier).toFixed(2)} MON`,
+                      rewardEarned: "0.18 MON",
                     },
                     ...t.recentBattles,
                   ],
@@ -219,66 +263,43 @@ export default function Home() {
           )
         );
 
-        // 2. Unlock On-Chain Achievement (UNSTOPPABLE or FIRST BLOOD)
         setAchievements((prev) =>
           prev.map((a) => {
             if (a.code === "FIRST_BLOOD" && !a.unlocked) {
-              return { ...a, unlocked: true, unlockedAt: "Just now", txHash: "0x" + Math.random().toString(16).slice(2, 10) + "b4e1" };
+              return { ...a, unlocked: true, unlockedAt: "Just now" };
             }
-            if (a.code === "UNSTOPPABLE" && progression.newWinStreak >= 5 && !a.unlocked) {
-              return { ...a, unlocked: true, unlockedAt: "Just now", txHash: "0x" + Math.random().toString(16).slice(2, 10) + "b4e1" };
+            if (a.code === "THREE_PEAT" && progression.newWinStreak >= 3 && !a.unlocked) {
+              return { ...a, unlocked: true, unlockedAt: "Just now" };
             }
             return a;
           })
         );
-
-        // 3. Update Profile stats
-        const rewardEarned = parseFloat(selectedTerritory.baseReward) * selectedTerritory.rewardMultiplier;
-        setProfile((prev) => ({
-          ...prev,
-          wins: prev.wins + 1,
-          totalBattles: prev.totalBattles + 1,
-          earnedMon: `${(parseFloat(prev.earnedMon) + rewardEarned).toFixed(2)} MON`,
-          predictionXp: prev.predictionXp + 75,
-          territoriesOwned: Math.min(5, prev.territoriesOwned + 1),
-          rank: "#2 Global",
-        }));
-
-        // 4. Update Leaderboard
-        setLeaderboard((prev) =>
-          prev.map((entry) =>
-            entry.isUser
-              ? {
-                  ...entry,
-                  rank: 2,
-                  wins: entry.wins + 1,
-                  battles: entry.battles + 1,
-                  territories: Math.min(5, entry.territories + 1),
-                  predictionXp: entry.predictionXp + 75,
-                  earnedMon: `${(parseFloat(entry.earnedMon) + rewardEarned).toFixed(1)} MON`,
-                }
-              : entry
-          )
-        );
-
-        setTimeout(() => {
-          setTxProgress(null);
-          setBattleResult({ won });
-
-          // If leveled up or evolved, trigger Evolution modal after battle result closed
-          if (progression.leveledUp) {
-            setEvolutionData({
-              newLevel: progression.newLevel,
-              stage: progression.newStage,
-              unlockedAbility: progression.unlockedAbility,
-            });
-          }
-        }, 1000);
-      } catch {
-        setBattleResult({ won });
       }
-    } else {
-      setBattleResult({ won });
+
+      setBattleResultData({
+        won,
+        ratingBefore,
+        ratingAfter,
+        ratingDelta,
+        influenceDelta,
+        crewPoints,
+        streak: progression.newWinStreak,
+      });
+
+      if (progression.leveledUp) {
+        setEvolutionData({
+          newLevel: progression.newLevel,
+          stage: progression.newStage,
+          unlockedAbility: progression.unlockedAbility,
+        });
+      }
+    } catch (err: unknown) {
+      const e = err as Error;
+      setTxProgress({
+        status: "ERROR",
+        title: "Settlement Error",
+        errorMessage: e.message || "Failed to settle battle.",
+      });
     }
   };
 
@@ -292,465 +313,290 @@ export default function Home() {
 
   const handleFortifyTerritory = async (terr: TerritoryWarState) => {
     soundFX.playDefend();
-    try {
-      setTxProgress({
-        status: "WAITING_SIGNATURE",
-        title: `Fortifying ${terr.name} (+1 Armor Level)...`,
-      });
-      await new Promise((r) => setTimeout(r, 1000));
-
-      const simulatedHash = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-      setTxProgress({
-        status: "CONFIRMED",
-        title: `Territory Armor Fortified to Level ${Math.min(5, terr.defenseLevel + 1)}!`,
-        txHash: simulatedHash,
-      });
-
-      setTerritories((prev) =>
-        prev.map((t) =>
-          t.id === terr.id
-            ? {
-                ...t,
-                defenseLevel: Math.min(5, t.defenseLevel + 1),
-                defenseHp: t.defenseHp + 100,
-                rewardMultiplier: parseFloat((t.rewardMultiplier + 0.1).toFixed(1)),
-                status: "FORTIFIED",
-              }
-            : t
-        )
-      );
-    } catch (e: unknown) {
-      const err = e as Error;
-      setTxProgress({
-        status: "ERROR",
-        title: "Fortify Failed",
-        errorMessage: err.message,
-      });
-    }
-  };
-
-  // Launch Full 90-Second Judge WOW Experience
-  const handleEnterWowMode = () => {
-    soundFX.playAttack();
-    setPlayerBeast(MOCK_BEASTS[0]); // Vortex
-    setSelectedTerritory(territories[0]); // Andheri
-    setOpponentBeast(MOCK_BEASTS[1]); // Titan
-    setCurrentTab("arena");
-    handleStartBattle();
-  };
-
-  const handleMintBeast = async () => {
-    soundFX.playClick();
-    try {
-      await web3Service.mintBeast(
-        walletAddress,
-        "CYBER DRAKE",
-        3,
-        (p) => setTxProgress(p)
-      );
-    } catch (err: unknown) {
-      const e = err as Error;
-      setTxProgress({
-        status: "ERROR",
-        title: "Mint Failed",
-        errorMessage: e.message || "Failed to mint beast NFT.",
-      });
-    }
+    setIsConsoleOpen(true);
+    setTxProgress({
+      status: "SIGN",
+      title: `Fortifying ${terr.name} (+1 Defense Level)...`,
+    });
+    await new Promise((r) => setTimeout(r, 1000));
+    setTxProgress({
+      status: "SETTLED",
+      title: `${terr.name} Fortified!`,
+    });
+    setTerritories((prev) =>
+      prev.map((t) =>
+        t.id === terr.id ? { ...t, defenseLevel: Math.min(5, t.defenseLevel + 1), status: "DEFENDING" } : t
+      )
+    );
+    setTimeout(() => {
+      setIsConsoleOpen(false);
+      setTxProgress(null);
+    }, 1200);
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
-      {/* Top Navigation */}
-      <Navbar
-        currentTab={currentTab}
-        setCurrentTab={(tab) => {
-          setIsFighting(false);
-          setCurrentTab(tab);
-        }}
-        isDemoMode={isDemoMode}
-        setIsDemoMode={(val) => {
-          setIsDemoMode(val);
-          if (!val) {
-            // Switching to LIVE — reset wallet so MetaMask prompt fires on CONNECT click
-            setWalletConnected(false);
-            setWalletAddress("");
-            setMonBalance("0.00 MON");
-          } else {
-            // Back to DEMO — restore demo wallet
-            setWalletConnected(true);
-            setWalletAddress("0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F");
-            setMonBalance("8.42 MON");
-          }
-        }}
-        walletConnected={walletConnected}
-        walletAddress={walletAddress}
-        setWalletConnected={handleConnectWallet}
-      />
+    <div className="min-h-screen bg-mh-bg text-mh-text flex flex-col justify-between">
+      <div>
+        {/* Navigation Bar */}
+        <Navbar
+          activeTab={currentTab}
+          onTabChange={(tab) => {
+            setIsFighting(false);
+            setCurrentTab(tab);
+          }}
+          walletConnected={walletConnected}
+          walletAddress={walletAddress}
+          monBalance={monBalance}
+          onConnectWallet={handleConnectWallet}
+          isDemoMode={isDemoMode}
+          onToggleDemoMode={setIsDemoMode}
+        />
 
-      {/* Live On-Chain Proof Strip Pinned Below Nav */}
-      <ChainStatusBar
-        isSimulated={isDemoMode}
-        lastTxHash={lastTxHash}
-        lastLatencyMs={lastLatencyMs}
-        isConnectedChain={true}
-      />
+        {/* Live Settlement Console (§5) */}
+        <LiveSettlementConsole
+          isOpen={isConsoleOpen}
+          progress={txProgress}
+          onClose={() => {
+            setIsConsoleOpen(false);
+            setTxProgress(null);
+          }}
+        />
 
-      {/* StakED-Style On-Chain Territory & Beast Market Ticker */}
-      <div className="bg-arcade-black text-white border-b-4 border-arcade-black py-2.5 overflow-hidden select-none font-mono text-xs font-bold tracking-wider">
-        <div className="animate-ticker flex items-center gap-8 whitespace-nowrap">
-          {/* Loop Set 1 */}
-          <span className="flex items-center gap-1.5"><span className="text-arcade-coral font-black">$EMBERWYRM</span> <span className="text-emerald-400">↑+85.7% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-arcade-yellow font-black">$ANDHERI</span> <span className="text-emerald-400">↑+1.8x MON</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-sky-400 font-black">$TIDEWARDEN</span> <span className="text-emerald-400">↑+77.8% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-black">$BANDRA</span> <span className="text-emerald-400">↑+0.22 MON</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-arcade-purple font-black">$NULLSHADE</span> <span className="text-emerald-400">↑+79.2% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-amber-400 font-black">$FORT</span> <span className="text-arcade-purple font-black">2.0x MULTIPLIER</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-yellow-400 font-black">$VOLTPAW</span> <span className="text-emerald-400">↑+69.5% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-red-400 font-black">$BKC</span> <span className="text-red-400">↓-CONTESTED</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5 text-arcade-electric font-black"><span>MONAD TESTNET (10143)</span> <span className="text-emerald-400">⚡ ~1s FINALITY</span></span>
-          <span className="text-white/30">•</span>
+        {/* Victory / Defeat Modal (§6) */}
+        {battleResultData && !isConsoleOpen && (
+          <VictoryDefeatModal
+            won={battleResultData.won}
+            playerBeast={playerBeast}
+            opponentBeast={opponentBeast}
+            territory={selectedTerritory}
+            ratingBefore={battleResultData.ratingBefore}
+            ratingAfter={battleResultData.ratingAfter}
+            ratingDelta={battleResultData.ratingDelta}
+            influenceDelta={battleResultData.influenceDelta}
+            crewPoints={battleResultData.crewPoints}
+            streak={battleResultData.streak}
+            onClaim={() => {
+              setBattleResultData(null);
+              setCurrentTab("map");
+            }}
+            onViewLeaderboard={() => {
+              setBattleResultData(null);
+              setCurrentTab("leaderboard");
+            }}
+          />
+        )}
 
-          {/* Loop Set 2 (Duplicate for Seamless Infinite Marquee) */}
-          <span className="flex items-center gap-1.5"><span className="text-arcade-coral font-black">$EMBERWYRM</span> <span className="text-emerald-400">↑+85.7% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-arcade-yellow font-black">$ANDHERI</span> <span className="text-emerald-400">↑+1.8x MON</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-sky-400 font-black">$TIDEWARDEN</span> <span className="text-emerald-400">↑+77.8% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-black">$BANDRA</span> <span className="text-emerald-400">↑+0.22 MON</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-arcade-purple font-black">$NULLSHADE</span> <span className="text-emerald-400">↑+79.2% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-amber-400 font-black">$FORT</span> <span className="text-arcade-purple font-black">2.0x MULTIPLIER</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-yellow-400 font-black">$VOLTPAW</span> <span className="text-emerald-400">↑+69.5% WR</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5"><span className="text-red-400 font-black">$BKC</span> <span className="text-red-400">↓-CONTESTED</span></span>
-          <span className="text-white/30">•</span>
-          <span className="flex items-center gap-1.5 text-arcade-electric font-black"><span>MONAD TESTNET (10143)</span> <span className="text-emerald-400">⚡ ~1s FINALITY</span></span>
-        </div>
-      </div>
+        {/* Beast Level-Up / Evolution Modal */}
+        {evolutionData && !battleResultData && !isConsoleOpen && (
+          <EvolutionModal
+            data={evolutionData}
+            onClose={() => setEvolutionData(null)}
+          />
+        )}
 
-      {/* MAIN CONTENT ROUTER */}
-      <main className="flex-1">
-        {/* VIEW 1: LANDING PAGE */}
+        {/* Beast Detail Modal */}
+        {inspectBeast && (
+          <BeastDetailModal
+            beast={inspectBeast}
+            onClose={() => setInspectBeast(null)}
+            onSelect={(b) => {
+              setPlayerBeast(b);
+              setInspectBeast(null);
+            }}
+          />
+        )}
+
+        {/* --- ROUTE VIEWS --- */}
+
+        {/* 1. LANDING & HERO SECTION */}
         {currentTab === "landing" && (
-          <div>
-            {/* ═══════════════════════════════════════════════════════════
-                HERO SECTION — CENTERED STAKED-STYLE NEO-BRUTALISM
-            ═══════════════════════════════════════════════════════════ */}
-            <section className="relative overflow-hidden border-b-4 border-arcade-black bg-warm-100 pt-7 pb-12 sm:pt-9 sm:pb-14 flex flex-col justify-center items-center text-center">
-              {/* Subtle background dot grid pattern */}
-              <div
-                className="absolute inset-0 opacity-[0.05] pointer-events-none"
-                style={{
-                  backgroundImage: "radial-gradient(#080808 1.5px, transparent 1.5px)",
-                  backgroundSize: "24px 24px",
-                }}
-              />
-
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center relative z-10">
-                {/* Live Event Pill */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-arcade-yellow rounded-xl border-3 border-arcade-black text-xs font-black uppercase tracking-wider shadow-arcade-sm mb-4">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  <Zap className="w-3.5 h-3.5 text-arcade-black" />
-                  <span>MONAD BLITZ MUMBAI V4 · LIVE ON-CHAIN ARENA</span>
+          <div className="py-8 max-w-7xl mx-auto px-4">
+            {/* SEASON 01 HEADER (§6.10) */}
+            <div className="bg-mh-navy border border-mh-border rounded-xl p-6 mb-10 shadow-2xl relative overflow-hidden">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-mh-card rounded border border-mh-border text-xs font-mono font-bold text-mh-reward mb-3">
+                    <Flame className="w-3.5 h-3.5 text-mh-reward" />
+                    SEASON 01 · MUMBAI CONQUEST
+                  </div>
+                  <h1 className="font-display text-5xl md:text-6xl font-black text-white uppercase tracking-wider leading-none">
+                    MY BATTLE <span className="text-mh-primary">CHANGES THE CITY</span>
+                  </h1>
+                  <p className="text-mh-text2 text-sm md:text-base mt-2 max-w-2xl">
+                    Catch AI Beasts, represent one of 4 Crews, and conquer Mumbai&apos;s 12 territories. Every battle is cryptographically settled on Monad Testnet.
+                  </p>
                 </div>
 
-                {/* StakED-Inspired Iconic Headline */}
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[84px] font-black text-arcade-black tracking-tight leading-[1.02] text-center mb-4">
-                  <span className="text-[#FF4A4A]">CATCH</span> & STAKE.<br />
-                  BATTLE & <span className="text-[#00D26A]">CONQUER.</span>
-                </h1>
+                <div className="grid grid-cols-3 gap-3 font-mono text-center">
+                  <div className="bg-mh-card p-3 rounded-lg border border-mh-border">
+                    <span className="text-[10px] text-mh-text3 block uppercase">DAYS REMAINING</span>
+                    <span className="text-xl font-bold text-white">24 DAYS</span>
+                  </div>
+                  <div className="bg-mh-card p-3 rounded-lg border border-mh-border">
+                    <span className="text-[10px] text-mh-text3 block uppercase">TOTAL BATTLES</span>
+                    <span className="text-xl font-bold text-mh-reward">1,420</span>
+                  </div>
+                  <div className="bg-mh-card p-3 rounded-lg border border-mh-border">
+                    <span className="text-[10px] text-mh-text3 block uppercase">ACTIVE HUNTERS</span>
+                    <span className="text-xl font-bold text-mh-win">488</span>
+                  </div>
+                </div>
+              </div>
 
-                {/* Subheadline (Centered, Clean Neo-brutalist) */}
-                <p className="text-base sm:text-lg md:text-xl font-bold text-arcade-black/80 max-w-2xl mx-auto mb-6 leading-relaxed">
-                  A gamified on-chain arena where beasts battle for{" "}
-                  <span className="bg-arcade-yellow px-2 py-0.5 rounded-lg border-2 border-arcade-black font-black text-arcade-black">
-                    MON rewards
-                  </span>{" "}
-                  and Mumbai territory control. Stake on battles, conquer nodes, and settle on Monad Testnet in ~1 second.
-                </p>
-
-                {/* StakED-Style Center CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 w-full sm:w-auto">
-                  {!walletConnected ? (
+              {/* Starter Beast & Crew Quick CTA */}
+              <div className="mt-8 pt-6 border-t border-mh-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono text-mh-text2">
+                    Starter Beast: <span className="text-white font-bold">{playerBeast.name}</span> (Level {playerBeast.level})
+                  </span>
+                  {!hasClaimedStarter && (
                     <button
-                      onClick={() => {
-                        soundFX.playAttack();
-                        handleConnectWallet(true);
-                      }}
-                      className="arcade-btn w-full sm:w-auto px-8 py-4 bg-arcade-black text-white hover:bg-neutral-800 rounded-xl text-base sm:text-lg font-black flex items-center justify-center gap-3 shadow-[4px_4px_0px_#080808] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#080808] active:translate-x-[2px] active:translate-y-[2px]"
+                      onClick={handleMintStarter}
+                      className="mh-btn text-xs py-1 px-3 bg-mh-card border-mh-primary text-mh-primaryGlow"
                     >
-                      <span className="text-2xl">🦊</span>
-                      <span>CONNECT WALLET (METAMASK)</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        soundFX.playAttack();
-                        setCurrentTab("arena");
-                      }}
-                      className="arcade-btn w-full sm:w-auto px-8 py-4 bg-arcade-coral text-arcade-black rounded-xl text-base sm:text-lg font-black flex items-center justify-center gap-3 shadow-[4px_4px_0px_#080808]"
-                    >
-                      <Swords className="w-5 h-5" />
-                      <span>ENTER BATTLE ARENA</span>
+                      <span>CLAIM FREE STARTER BEAST</span>
                     </button>
                   )}
-
-                  <button
-                    onClick={() => {
-                      soundFX.playClick();
-                      setCurrentTab("map");
-                    }}
-                    className="arcade-btn w-full sm:w-auto px-6 py-4 bg-white text-arcade-black hover:bg-warm-200 rounded-xl text-base font-black flex items-center justify-center gap-2 shadow-[4px_4px_0px_#080808]"
-                  >
-                    <Compass className="w-5 h-5 text-arcade-electric" />
-                    <span>VIEW WAR MAP</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
                 </div>
 
-                {/* Clean StakED-Style Trust Badges */}
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-6 border-t-3 border-arcade-black/15">
-                  {[
-                    { icon: <Zap className="w-4 h-4 text-arcade-electric" />, label: "Sub-Second Monad Finality" },
-                    { icon: <ShieldCheck className="w-4 h-4 text-emerald-600" />, label: "Zero Escrow NFT Custody" },
-                    { icon: <Trophy className="w-4 h-4 text-amber-500" />, label: "5 Soulbound Badges" },
-                    { icon: <Award className="w-4 h-4 text-arcade-coral" />, label: "ERC-721 Beast Ownership" },
-                  ].map((b, i) => (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setCurrentTab("arena")}
+                    className="mh-btn text-xs py-2.5 px-6 shadow-mh-glow"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Swords className="w-4 h-4" /> ENTER ARENA
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setCurrentTab("map")}
+                    className="mh-btn mh-btn-secondary text-xs py-2.5 px-5"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4" /> MUMBAI MAP
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 4 CREWS SELECTOR */}
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-2xl font-black text-white uppercase tracking-wide">
+                  FACTION CREWS (CHOOSE ALLEGIANCE)
+                </h2>
+                <span className="text-xs font-mono text-mh-text3">Season 01 Faction War</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {CREWS.map((crew) => (
+                  <div
+                    key={crew.id}
+                    onClick={() => handleJoinCrew(crew.id)}
+                    className={`bg-mh-navy border rounded-xl p-5 cursor-pointer transition-all shadow-md ${
+                      userCrewId === crew.id
+                        ? "border-mh-primary bg-mh-primary/10 shadow-mh-glow"
+                        : "border-mh-border hover:border-mh-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-3xl">{crew.banner}</span>
+                      <span className="font-mono text-xs font-bold text-mh-reward">{crew.seasonPoints} PTS</span>
+                    </div>
+
+                    <h3 className="font-display text-xl font-black uppercase text-white tracking-wide">
+                      {crew.name}
+                    </h3>
+                    <p className="text-xs text-mh-text2 mt-1 mb-4 line-clamp-2">
+                      {crew.description}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-mh-border/50 text-[10px] font-mono text-mh-text3">
+                      <span>{crew.wins}W - {crew.losses}L</span>
+                      <span className={userCrewId === crew.id ? "text-mh-win font-bold" : ""}>
+                        {userCrewId === crew.id ? "SELECTED CREW" : "JOIN CREW"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Bestiary & Territories Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+              {/* Beast Preview */}
+              <div className="bg-mh-navy border border-mh-border rounded-xl p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-xl font-black uppercase text-white tracking-wide">
+                    YOUR BATTLE SQUAD
+                  </h3>
+                  <button
+                    onClick={() => setCurrentTab("profile")}
+                    className="text-xs font-mono text-mh-primary hover:underline font-bold"
+                  >
+                    VIEW ALL →
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {MOCK_BEASTS.slice(0, 2).map((b) => (
                     <div
-                      key={i}
-                      className="flex items-center gap-2 px-3.5 py-1.5 bg-white rounded-xl border-2 border-arcade-black text-xs font-black shadow-[2px_2px_0px_#080808]"
+                      key={b.id}
+                      onClick={() => setPlayerBeast(b)}
+                      className={`bg-mh-card p-3 rounded-lg border cursor-pointer ${
+                        playerBeast.id === b.id ? "border-mh-primary" : "border-mh-border"
+                      }`}
                     >
-                      {b.icon}
-                      <span>{b.label}</span>
+                      <div className="text-xs font-mono font-bold text-white mb-1">{b.name}</div>
+                      <div className="text-[10px] font-mono text-mh-text3">Level {b.level} • {b.rarity}</div>
                     </div>
                   ))}
                 </div>
               </div>
-            </section>
 
-
-
-            {/* ═══════════════════════════════════════════════════════════
-                LIVE STATS STRIP — social proof for voters
-            ═══════════════════════════════════════════════════════════ */}
-            <section className="border-b-4 border-arcade-black bg-arcade-black">
-              <div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10">
-                {[
-                  { value: "1,847", label: "BATTLES FOUGHT", icon: <Swords className="w-5 h-5 text-arcade-coral" />, color: "text-arcade-coral" },
-                  { value: "248.3", label: "MON DISTRIBUTED", icon: <Zap className="w-5 h-5 text-arcade-yellow" />, color: "text-arcade-yellow" },
-                  { value: "5", label: "TERRITORIES LIVE", icon: <Compass className="w-5 h-5 text-arcade-mint" />, color: "text-arcade-mint" },
-                  { value: "312", label: "HUNTERS ONLINE", icon: <Flame className="w-5 h-5 text-purple-400" />, color: "text-purple-400" },
-                ].map((stat, i) => (
-                  <div key={i} className="flex flex-col items-center justify-center gap-1 px-4 py-2 first:pl-0 last:pr-0">
-                    <div className="flex items-center gap-2">
-                      {stat.icon}
-                      <span className={`text-2xl sm:text-3xl font-black font-mono ${stat.color}`}>
-                        {stat.value}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      {stat.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* How It Works Architecture */}
-            <HowItWorks
-              onStartHunt={() => {
-                soundFX.playClick();
-                setCurrentTab("map");
-              }}
-              onEnterArena={() => {
-                soundFX.playClick();
-                setCurrentTab("arena");
-              }}
-            />
-
-            {/* ═══════════════════════════════════════════════════════════
-                BEAST SHOWCASE — glowing element cards
-            ═══════════════════════════════════════════════════════════ */}
-            <section className="py-16 bg-warm-100 border-t-4 border-arcade-black">
-              <div className="max-w-7xl mx-auto px-4">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-                  <div>
-                    <div className="inline-block px-3 py-1 bg-arcade-yellow rounded-lg border-2 border-arcade-black text-[11px] font-black uppercase tracking-wider shadow-arcade-sm mb-3">
-                      ⚡ BEAST ROSTER — 4 ON-CHAIN CHAMPIONS
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-arcade-black tracking-tight leading-none">
-                      CHOOSE YOUR{" "}
-                      <span
-                        style={{
-                          background: "linear-gradient(90deg, #F97316, #2563EB, #8B5CF6, #EAB308)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        BEAST
-                      </span>
-                    </h2>
-                    <p className="text-sm font-bold text-arcade-black/60 mt-2">
-                      Each is a unique ERC-721 NFT with on-chain battle stats. True ownership.
-                    </p>
-                  </div>
+              {/* Active Arenas Preview */}
+              <div className="bg-mh-navy border border-mh-border rounded-xl p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-xl font-black uppercase text-white tracking-wide">
+                    CONTESTED TERRITORIES
+                  </h3>
                   <button
-                    onClick={() => setCurrentTab("beasts")}
-                    className="arcade-btn py-2.5 px-5 bg-arcade-electric text-white rounded-xl text-xs flex items-center gap-2 self-start md:self-auto"
+                    onClick={() => setCurrentTab("map")}
+                    className="text-xs font-mono text-mh-primary hover:underline font-bold"
                   >
-                    VIEW FULL BESTIARY <Compass className="w-4 h-4" />
+                    OPEN MAP →
                   </button>
                 </div>
-
-                {/* Beast Grid — enhanced glow cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {MOCK_BEASTS.map((beast) => {
-                    const glowClass = beast.element === "Fire" ? "glow-fire" : beast.element === "Water" ? "glow-water" : beast.element === "Dark" ? "glow-dark" : "glow-electric";
-                    const gradientStyle = {
-                      background: `linear-gradient(160deg, ${
-                        beast.element === "Fire" ? "#431407, #7c2d12" :
-                        beast.element === "Water" ? "#0c1445, #1e3a8a" :
-                        beast.element === "Dark" ? "#1e1b4b, #3b0764" :
-                        "#1a1a00, #3d3100"
-                      })`,
-                    };
-                    const accentBorder = beast.element === "Fire" ? "border-orange-500" : beast.element === "Water" ? "border-blue-500" : beast.element === "Dark" ? "border-purple-500" : "border-yellow-400";
-                    return (
-                      <div
-                        key={beast.id}
-                        className={`arcade-card ${glowClass} overflow-hidden flex flex-col`}
-                        style={gradientStyle}
-                      >
-                        {/* Top Bar */}
-                        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                          <span className="font-mono text-[11px] font-black px-2 py-0.5 bg-white/10 text-white/70 rounded-md border border-white/20">
-                            NFT #{String(beast.tokenId).padStart(3, "0")}
-                          </span>
-                          <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${accentBorder} text-white bg-white/10`}>
-                            {beast.rarity}
-                          </span>
-                        </div>
-
-                        {/* Beast SVG — floating animation */}
-                        <div
-                          onClick={() => setInspectBeast(beast)}
-                          className="relative flex items-center justify-center cursor-pointer group px-4 py-2"
-                        >
-                          <div className="absolute inset-0 opacity-20 rounded-xl"
-                            style={{ background: `radial-gradient(circle, ${beast.accentColor} 0%, transparent 70%)` }}
-                          />
-                          <div className="animate-float-beast">
-                            <BeastSvg id={beast.id} className="w-36 h-36 drop-shadow-xl" />
-                          </div>
-                          <div className="absolute top-1 left-2 text-[11px] font-black px-2 py-0.5 bg-black/30 rounded border border-white/20 text-white">
-                            LVL {beast.level}
-                          </div>
-                          <div className="absolute top-1 right-2 text-[11px] font-black px-2 py-0.5 bg-black/30 rounded border border-white/20 text-white">
-                            {beast.element}
-                          </div>
-                        </div>
-
-                        {/* Beast Info */}
-                        <div className="px-4 pb-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-xl font-black text-white tracking-tight">{beast.name}</h3>
-                            <span className="text-xs font-black text-white/70 bg-white/10 px-2 py-0.5 rounded border border-white/20">
-                              {beast.winRate}% WR
-                            </span>
-                          </div>
-                          <p className="text-[11px] font-bold text-white/50 mb-3">{beast.title}</p>
-
-                          {/* Signature Move */}
-                          <div className="text-[11px] font-black uppercase px-2 py-1 rounded border border-white/20 bg-white/10 text-white/80 mb-3 tracking-wider">
-                            ⚡ {beast.specialMove}
-                          </div>
-
-                          {/* Compact stat bars */}
-                          <div className="space-y-1.5 mb-4">
-                            {[
-                              { label: "ATK", val: beast.attack, color: "bg-red-400" },
-                              { label: "DEF", val: beast.defense, color: "bg-emerald-400" },
-                              { label: "SPD", val: beast.speed, color: "bg-amber-400" },
-                            ].map((s) => (
-                              <div key={s.label} className="flex items-center gap-2">
-                                <span className="text-[10px] font-black text-white/50 w-6">{s.label}</span>
-                                <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                  <div className={`h-full ${s.color} rounded-full`} style={{ width: `${Math.min(100, (s.val / 120) * 100)}%` }} />
-                                </div>
-                                <span className="text-[10px] font-mono font-black text-white/60 w-6 text-right">{s.val}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="mt-auto grid grid-cols-2 gap-2 px-4 pb-4">
-                          <button
-                            onClick={() => { soundFX.playClick(); setInspectBeast(beast); }}
-                            className="arcade-btn py-2 px-3 bg-white/10 text-white rounded-xl text-xs flex items-center justify-center gap-1 border-white/30"
-                            style={{ border: "2px solid rgba(255,255,255,0.25)", boxShadow: "2px 2px 0 rgba(0,0,0,0.5)" }}
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            DETAILS
-                          </button>
-                          <button
-                            onClick={() => { soundFX.playAttack(); setPlayerBeast(beast); setCurrentTab("arena"); }}
-                            className="arcade-btn py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 font-black"
-                            style={{
-                              background: beast.accentColor,
-                              color: "#080808",
-                              border: `2px solid ${beast.accentColor}`,
-                              boxShadow: `2px 2px 0 #080808`,
-                            }}
-                          >
-                            <Swords className="w-3.5 h-3.5" />
-                            {playerBeast.id === beast.id ? "READY ✓" : "BATTLE"}
-                          </button>
-                        </div>
+                <div className="space-y-2">
+                  {INITIAL_TERRITORY_WAR.slice(0, 3).map((t) => (
+                    <div
+                      key={t.id}
+                      onClick={() => handleChallengeTerritory(t)}
+                      className="flex items-center justify-between p-2.5 rounded bg-mh-card border border-mh-border text-xs cursor-pointer hover:border-mh-primary"
+                    >
+                      <div>
+                        <span className="font-bold text-white block">{t.name}</span>
+                        <span className="text-[10px] text-mh-text3 font-mono">{t.zone} · {t.currentOwner}</span>
                       </div>
-                    );
-                  })}
+                      <span className="mh-badge text-[10px] bg-mh-card text-mh-reward">
+                        <span>{t.status}</span>
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </section>
+            </div>
           </div>
         )}
 
-        {/* VIEW 2: ARENA (LOBBY OR ACTIVE BATTLE) */}
+        {/* 2. ARENA TAB */}
         {currentTab === "arena" && (
           <div>
             {isFighting ? (
               <BattleScreen
                 playerBeast={playerBeast}
                 opponentBeast={opponentBeast}
-                territory={{
-                  id: selectedTerritory.id,
-                  numericId: selectedTerritory.numericId,
-                  name: selectedTerritory.name,
-                  zone: selectedTerritory.zone,
-                  currentOwner: selectedTerritory.currentOwner,
-                  guardian: selectedTerritory.guardian,
-                  guardianLevel: selectedTerritory.guardianLevel,
-                  reward: selectedTerritory.baseReward,
-                  entryFee: selectedTerritory.entryFee,
-                  rarity: selectedTerritory.rarity,
-                  status: "CHALLENGEABLE",
-                  conqueredCount: selectedTerritory.conqueredCount,
-                  description: selectedTerritory.description,
-                  badgeBg: selectedTerritory.badgeBg,
-                }}
+                territory={selectedTerritory}
                 onBattleEnd={handleBattleEnd}
                 onExit={() => setIsFighting(false)}
               />
@@ -758,23 +604,8 @@ export default function Home() {
               <ArenaLobby
                 playerBeast={playerBeast}
                 opponentBeast={opponentBeast}
-                territory={{
-                  id: selectedTerritory.id,
-                  numericId: selectedTerritory.numericId,
-                  name: selectedTerritory.name,
-                  zone: selectedTerritory.zone,
-                  currentOwner: selectedTerritory.currentOwner,
-                  guardian: selectedTerritory.guardian,
-                  guardianLevel: selectedTerritory.guardianLevel,
-                  reward: selectedTerritory.baseReward,
-                  entryFee: selectedTerritory.entryFee,
-                  rarity: selectedTerritory.rarity,
-                  status: "CHALLENGEABLE",
-                  conqueredCount: selectedTerritory.conqueredCount,
-                  description: selectedTerritory.description,
-                  badgeBg: selectedTerritory.badgeBg,
-                }}
-                onChangeBeast={() => setCurrentTab("beasts")}
+                territory={selectedTerritory}
+                onChangeBeast={() => setCurrentTab("profile")}
                 onChangeTerritory={() => setCurrentTab("map")}
                 onStartBattle={handleStartBattle}
               />
@@ -782,7 +613,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* VIEW 3: LIVE TERRITORY WAR MAP */}
+        {/* 3. MUMBAI TACTICAL MAP */}
         {currentTab === "map" && (
           <TerritoryMap
             territories={territories}
@@ -792,121 +623,30 @@ export default function Home() {
           />
         )}
 
-        {/* VIEW 4: ON-CHAIN ACHIEVEMENTS SHOWCASE */}
-        {currentTab === "achievements" && (
-          <AchievementsShowcase achievements={achievements} />
+        {/* 4. LEADERBOARDS */}
+        {currentTab === "leaderboard" && (
+          <Leaderboard entries={leaderboard} userAddress={walletAddress} />
         )}
 
-        {/* VIEW 6: BEAST COLLECTION */}
-        {currentTab === "beasts" && (
-          <div className="py-8 max-w-7xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-              <div>
-                <div className="inline-block px-3 py-1 bg-arcade-yellow rounded-lg border-2 border-arcade-black text-[11px] font-black uppercase tracking-wider shadow-arcade-sm mb-2">
-                  NFT ROSTER
-                </div>
-                <h2 className="text-4xl md:text-5xl font-black text-arcade-black tracking-tight leading-none">
-                  BEAST <span className="text-arcade-electric">COLLECTION</span>
-                </h2>
-              </div>
-              <button
-                onClick={handleMintBeast}
-                className="arcade-btn py-3 px-5 bg-arcade-electric text-white rounded-xl text-xs flex items-center gap-2 self-start md:self-auto"
-              >
-                <Sparkles className="w-4 h-4" />
-                MINT NEW BEAST (0.05 MON)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {MOCK_BEASTS.map((beast) => (
-                <BeastCard
-                  key={beast.id}
-                  beast={beast}
-                  isSelected={playerBeast.id === beast.id}
-                  onSelect={(b) => {
-                    setPlayerBeast(b);
-                    setCurrentTab("arena");
-                  }}
-                  onViewDetails={(b) => setInspectBeast(b)}
-                />
-              ))}
-            </div>
-          </div>
+        {/* 5. HUNT TV */}
+        {currentTab === "tv" && (
+          <SpectatorMode />
         )}
 
-        {/* VIEW 7: LEADERBOARD */}
-        {currentTab === "leaderboard" && <Leaderboard entries={leaderboard} />}
-
-        {/* VIEW 8: PLAYER PROFILE */}
+        {/* 6. HUNTER PROFILE */}
         {currentTab === "profile" && (
           <PlayerProfile
             profile={profile}
+            userCrewId={userCrewId}
             onSelectBeast={(b) => setPlayerBeast(b)}
-            onEnterArena={() => setCurrentTab("arena")}
+            onEnterArena={() => {
+              setCurrentTab("arena");
+              setIsFighting(false);
+            }}
           />
         )}
-      </main>
+      </div>
 
-      {/* Transaction Modal (Waiting, Pending, Success, Error states) */}
-      <TransactionModal progress={txProgress} onClose={() => setTxProgress(null)} />
-
-      {/* Beast Detail Inspection Modal */}
-      {inspectBeast && (
-        <BeastDetailModal
-          beast={inspectBeast}
-          onClose={() => setInspectBeast(null)}
-          onSelectForArena={(b) => {
-            setPlayerBeast(b);
-            setCurrentTab("arena");
-          }}
-        />
-      )}
-
-      {/* Victory / Defeat Celebration Modal */}
-      {battleResult && (
-        <VictoryDefeatModal
-          won={battleResult.won}
-          playerBeast={playerBeast}
-          opponentBeast={opponentBeast}
-          territory={{
-            id: selectedTerritory.id,
-            numericId: selectedTerritory.numericId,
-            name: selectedTerritory.name,
-            zone: selectedTerritory.zone,
-            currentOwner: selectedTerritory.currentOwner,
-            guardian: selectedTerritory.guardian,
-            guardianLevel: selectedTerritory.guardianLevel,
-            reward: selectedTerritory.baseReward,
-            entryFee: selectedTerritory.entryFee,
-            rarity: selectedTerritory.rarity,
-            status: "CHALLENGEABLE",
-            conqueredCount: selectedTerritory.conqueredCount,
-            description: selectedTerritory.description,
-            badgeBg: selectedTerritory.badgeBg,
-          }}
-          onClaim={() => {
-            setBattleResult(null);
-          }}
-          onViewLeaderboard={() => {
-            setBattleResult(null);
-            setCurrentTab("leaderboard");
-          }}
-        />
-      )}
-
-      {/* Evolution & Level-Up Ascension Modal */}
-      {evolutionData && (
-        <EvolutionModal
-          beast={playerBeast}
-          newLevel={evolutionData.newLevel}
-          stage={evolutionData.stage}
-          unlockedAbility={evolutionData.unlockedAbility}
-          onClose={() => setEvolutionData(null)}
-        />
-      )}
-
-      {/* Site Footer */}
       <Footer />
     </div>
   );
