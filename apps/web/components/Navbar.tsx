@@ -64,30 +64,32 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-[#05070B]/90 backdrop-blur-xl border-b border-[#1E273D]/80 px-4 lg:px-8 py-3 transition-all">
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
-        {/* Brand with Official Logo Asset */}
+        {/* Brand Logo */}
         <Link
           href="/"
           onClick={() => soundFX.playClick()}
-          className="flex items-center gap-3 select-none group"
+          className="flex items-center gap-3 select-none group flex-shrink-0"
         >
-          <div className="relative w-11 h-11 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-lg bg-[#0A0E17] border border-[#1E273D] group-hover:border-[#E63946] transition-colors">
+          {/* M-mark logo icon */}
+          <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 drop-shadow-[0_0_10px_rgba(230,57,70,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(230,57,70,0.7)] transition-all">
             <Image
-              src="/assets/branding/monad-hunt-logo.jpg"
-              alt="Monad Hunt"
-              width={44}
-              height={44}
-              className="object-contain filter contrast-125 mix-blend-screen scale-110"
+              src="/assets/branding/monad-m-mark.jpg"
+              alt="M"
+              fill
+              sizes="44px"
               priority
+              className="object-contain rounded-sm"
             />
           </div>
-          <div>
-            <div className="font-display font-black text-xl sm:text-2xl tracking-wider uppercase text-white leading-none flex items-center gap-1.5">
-              <span>MONAD</span>
-              <span className="text-[#E63946] drop-shadow-[0_0_10px_rgba(230,57,70,0.8)]">HUNT</span>
+          {/* Brand text */}
+          <div className="leading-none">
+            <div className="font-display font-black text-lg sm:text-xl tracking-wider uppercase flex items-baseline gap-1">
+              <span className="text-white">MONAD</span>
+              <span className="text-[#E63946] drop-shadow-[0_0_8px_rgba(230,57,70,0.7)]">HUNT</span>
             </div>
-            <div className="text-[10px] font-mono tracking-widest text-[#94A3B8] uppercase flex items-center gap-1.5 mt-0.5">
+            <div className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-[#64748B] uppercase mt-0.5 flex items-center gap-1">
               <span>CITY LEAGUE</span>
-              <span className="text-[#E63946] font-bold">·</span>
+              <span className="text-[#E63946]">·</span>
               <span className="text-[#F4D35E]">SEASON 01</span>
             </div>
           </div>
