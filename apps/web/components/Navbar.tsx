@@ -1,43 +1,43 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
+import Link from "next/link";
 import { soundFX } from "@/game/SoundFX";
 import {
   Volume2,
   VolumeX,
   Wallet,
-  Sparkles,
   MapPin,
   Swords,
   Trophy,
   User,
+  Radio,
+  Tv,
   Award,
-  ChevronDown,
-  ExternalLink,
 } from "lucide-react";
 
 interface NavbarProps {
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
-  isDemoMode: boolean;
-  setIsDemoMode: (val: boolean) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   walletConnected: boolean;
   walletAddress?: string;
-  setWalletConnected: (val: boolean) => void;
+  monBalance?: string;
+  onConnectWallet: (connect: boolean) => void;
+  isDemoMode: boolean;
+  onToggleDemoMode: (val: boolean) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  currentTab,
-  setCurrentTab,
-  isDemoMode,
-  setIsDemoMode,
+  activeTab,
+  onTabChange,
   walletConnected,
   walletAddress,
-  setWalletConnected,
+  monBalance = "0.00 MON",
+  onConnectWallet,
+  isDemoMode,
+  onToggleDemoMode,
 }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const toggleSound = () => {
     const next = !soundEnabled;
@@ -48,111 +48,122 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleNav = (tab: string) => {
     soundFX.playClick();
-    setCurrentTab(tab);
-    setIsProfileOpen(false);
+    onTabChange(tab);
   };
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setIsProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const displayAddress = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-    : "0x71...8A2F";
+    : "0x71C9...8A2F";
 
   return (
-    <header className="sticky top-0 z-40 bg-warm-100/95 backdrop-blur-md border-b-4 border-arcade-black px-3 sm:px-6 py-2.5 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4">
-        {/* Left: Brand / Logo */}
+    <header className="sticky top-0 z-40 bg-mh-navy/90 backdrop-blur-md border-b border-mh-border px-4 py-3 transition-all">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        {/* Brand */}
         <div
           onClick={() => handleNav("landing")}
-          className="flex items-center gap-2.5 cursor-pointer group select-none flex-shrink-0"
+          className="flex items-center gap-3 cursor-pointer select-none"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-arcade-coral rounded-xl border-3 border-arcade-black flex items-center justify-center shadow-arcade-sm group-hover:-rotate-6 transition-transform">
-            <span className="text-xl sm:text-2xl">🐲</span>
+          <div className="w-10 h-10 bg-mh-primary/20 border border-mh-primary/50 rounded-lg flex items-center justify-center shadow-mh-glow">
+            <span className="text-2xl">🐲</span>
           </div>
-          <div className="hidden xs:block">
-            <div className="font-black text-xl sm:text-2xl tracking-tighter leading-none text-arcade-black flex items-center gap-0.5">
-              MONAD<span className="text-arcade-electric">HUNT</span>
+          <div>
+            <div className="font-display font-black text-2xl tracking-wider uppercase text-white leading-none">
+              MONAD<span className="text-mh-primary">HUNT</span>
             </div>
-            <div className="text-[9px] sm:text-[10px] font-black tracking-widest text-arcade-black/60 uppercase flex items-center gap-1 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              BLITZ MUMBAI V4
+            <div className="text-[10px] font-mono tracking-widest text-mh-text3 uppercase flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-mh-win animate-pulse" />
+              CITY LEAGUE · SEASON 01
             </div>
           </div>
         </div>
 
-        {/* Center: StakED-style Boxed Neo-Brutalist Nav Buttons */}
-        <nav className="flex items-center gap-2">
+        {/* Center Nav Navigation */}
+        <nav className="hidden md:flex items-center gap-2">
           <button
             onClick={() => handleNav("arena")}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg font-black text-xs uppercase border-2 border-arcade-black shadow-[2px_2px_0px_#080808] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#080808] active:translate-x-[1px] active:translate-y-[1px] ${
-              currentTab === "arena"
-                ? "bg-arcade-coral text-arcade-black"
-                : "bg-white text-arcade-black hover:bg-warm-200"
+            className={`mh-btn text-xs py-1.5 px-3.5 ${
+              activeTab === "arena" ? "bg-mh-primary text-white" : "mh-btn-secondary"
             }`}
           >
-            <Swords className="w-3.5 h-3.5" />
-            <span>Arena</span>
+            <span className="flex items-center gap-1.5">
+              <Swords className="w-3.5 h-3.5" /> Arena
+            </span>
           </button>
 
           <button
             onClick={() => handleNav("map")}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg font-black text-xs uppercase border-2 border-arcade-black shadow-[2px_2px_0px_#080808] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#080808] active:translate-x-[1px] active:translate-y-[1px] ${
-              currentTab === "map"
-                ? "bg-arcade-mint text-arcade-black"
-                : "bg-white text-arcade-black hover:bg-warm-200"
+            className={`mh-btn text-xs py-1.5 px-3.5 ${
+              activeTab === "map" ? "bg-mh-primary text-white" : "mh-btn-secondary"
             }`}
           >
-            <MapPin className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">War Map</span>
-            <span className="sm:hidden">Map</span>
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" /> Mumbai Map
+            </span>
           </button>
 
           <button
             onClick={() => handleNav("leaderboard")}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg font-black text-xs uppercase border-2 border-arcade-black shadow-[2px_2px_0px_#080808] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#080808] active:translate-x-[1px] active:translate-y-[1px] ${
-              currentTab === "leaderboard"
-                ? "bg-arcade-purple text-arcade-black"
-                : "bg-white text-arcade-black hover:bg-warm-200"
+            className={`mh-btn text-xs py-1.5 px-3.5 ${
+              activeTab === "leaderboard" ? "bg-mh-primary text-white" : "mh-btn-secondary"
             }`}
           >
-            <Trophy className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Ranks</span>
+            <span className="flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5" /> Leaderboards
+            </span>
           </button>
+
+          <button
+            onClick={() => handleNav("tv")}
+            className={`mh-btn text-xs py-1.5 px-3.5 ${
+              activeTab === "tv" ? "bg-mh-primary text-white" : "mh-btn-secondary"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Tv className="w-3.5 h-3.5" /> Hunt TV
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleNav("profile")}
+            className={`mh-btn text-xs py-1.5 px-3.5 ${
+              activeTab === "profile" ? "bg-mh-primary text-white" : "mh-btn-secondary"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" /> Profile
+            </span>
+          </button>
+
+          <Link
+            href="/live"
+            className="mh-btn text-xs py-1.5 px-3.5 bg-mh-live/20 border-mh-live/50 text-mh-live hover:bg-mh-live hover:text-white"
+          >
+            <span className="flex items-center gap-1.5">
+              <Radio className="w-3.5 h-3.5 animate-pulse" /> /Live Feed
+            </span>
+          </Link>
         </nav>
 
-        {/* Right Status Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-          {/* Honest Labelling Switch: SIMULATED / LIVE TESTNET */}
-          <div className="flex items-center gap-1.5 bg-white px-2 sm:px-3 py-1.5 rounded-xl border-3 border-arcade-black shadow-arcade-sm">
-            <span className="text-[10px] sm:text-[11px] font-black uppercase text-arcade-black tracking-tight">
+        {/* Right Controls */}
+        <div className="flex items-center gap-2.5">
+          {/* Demo Mode Toggle */}
+          <div className="flex items-center gap-1.5 bg-mh-card px-2.5 py-1 rounded border border-mh-border">
+            <span className="text-[10px] font-mono font-bold text-mh-text3 uppercase">
               {isDemoMode ? "SIMULATED" : "LIVE"}
             </span>
             <button
               onClick={() => {
                 soundFX.playClick();
-                setIsDemoMode(!isDemoMode);
+                onToggleDemoMode(!isDemoMode);
               }}
-              className={`w-9 h-5 sm:w-10 sm:h-5.5 rounded-full border-2 border-arcade-black transition-colors relative flex items-center p-0.5 ${
-                !isDemoMode ? "bg-emerald-400" : "bg-amber-300"
+              className={`w-8 h-4.5 rounded-full p-0.5 transition-colors border ${
+                !isDemoMode ? "bg-mh-win border-mh-win" : "bg-mh-reward/40 border-mh-reward"
               }`}
-              title={
-                isDemoMode
-                  ? "Currently in Simulated Mode (No chain writes)"
-                  : "Currently Connected to Real Monad Testnet"
-              }
+              title={isDemoMode ? "Switch to Live Monad Testnet" : "Switch to Demo Simulated Mode"}
             >
               <div
-                className={`w-3.5 h-3.5 rounded-full bg-arcade-black transition-transform ${
-                  !isDemoMode ? "translate-x-4 sm:translate-x-4.5" : "translate-x-0"
+                className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${
+                  !isDemoMode ? "translate-x-3.5" : "translate-x-0"
                 }`}
               />
             </button>
@@ -161,85 +172,31 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-3 border-arcade-black bg-white flex items-center justify-center shadow-arcade-sm hover:bg-warm-200 transition-colors"
-            title={soundEnabled ? "Mute Arcade SFX" : "Unmute SFX"}
+            className="p-2 rounded bg-mh-card border border-mh-border text-mh-text2 hover:text-white"
+            title="Toggle Sound"
           >
-            {soundEnabled ? (
-              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-arcade-black" />
-            ) : (
-              <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-arcade-black/40" />
-            )}
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
 
           {/* Wallet Connect Button */}
-          <button
-            onClick={() => {
-              soundFX.playClick();
-              setWalletConnected(!walletConnected);
-            }}
-            className={`arcade-btn px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 ${
-              walletConnected
-                ? "bg-arcade-mint text-arcade-black"
-                : "bg-arcade-electric text-white"
-            }`}
-          >
-            <Wallet className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{walletConnected ? displayAddress : "CONNECT"}</span>
-            <span className="sm:hidden">{walletConnected ? displayAddress.slice(0, 4) : "CONNECT"}</span>
-          </button>
-
-          {/* Profile Dropdown Menu (Contains Badges, Beasts, Profile Overview) */}
-          <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => {
-                soundFX.playClick();
-                setIsProfileOpen(!isProfileOpen);
-              }}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-3 border-arcade-black flex items-center justify-center shadow-arcade-sm transition-all ${
-                isProfileOpen || currentTab === "profile" || currentTab === "achievements" || currentTab === "beasts"
-                  ? "bg-arcade-electric text-white"
-                  : "bg-white text-arcade-black hover:bg-warm-200"
-              }`}
-              title="Hunter Profile"
-            >
-              <User className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl border-3 border-arcade-black shadow-arcade-xl py-2 z-50 animate-in fade-in zoom-in-95">
-                <div className="px-3 py-1.5 border-b-2 border-arcade-black/10 mb-1">
-                  <div className="text-[10px] font-black text-arcade-black/60 uppercase">HUNTER ACCOUNT</div>
-                  <div className="text-xs font-black text-arcade-black font-mono truncate">
-                    {walletConnected ? "0x71C9...8A2F" : "GUEST (NOT CONNECTED)"}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleNav("profile")}
-                  className="w-full px-3 py-2 text-left text-xs font-black uppercase flex items-center gap-2 hover:bg-warm-200 text-arcade-black"
-                >
-                  <User className="w-4 h-4 text-arcade-electric" />
-                  <span>Profile Overview</span>
-                </button>
-
-                <button
-                  onClick={() => handleNav("achievements")}
-                  className="w-full px-3 py-2 text-left text-xs font-black uppercase flex items-center gap-2 hover:bg-warm-200 text-arcade-black"
-                >
-                  <Award className="w-4 h-4 text-arcade-purple" />
-                  <span>On-Chain Badges</span>
-                </button>
-
-                <button
-                  onClick={() => handleNav("beasts")}
-                  className="w-full px-3 py-2 text-left text-xs font-black uppercase flex items-center gap-2 hover:bg-warm-200 text-arcade-black"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Beast Inventory</span>
-                </button>
+          {walletConnected ? (
+            <div className="flex items-center gap-2 bg-mh-card border border-mh-border px-3 py-1.5 rounded">
+              <div className="w-2 h-2 rounded-full bg-mh-win animate-pulse" />
+              <div className="text-left font-mono">
+                <div className="text-xs font-bold text-white">{displayAddress}</div>
+                <div className="text-[10px] text-mh-primary font-bold">{monBalance}</div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => onConnectWallet(true)}
+              className="mh-btn text-xs py-2 px-4"
+            >
+              <span className="flex items-center gap-1.5">
+                <Wallet className="w-3.5 h-3.5" /> Connect Wallet
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </header>

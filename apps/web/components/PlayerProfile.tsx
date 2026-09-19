@@ -4,103 +4,111 @@ import React from "react";
 import { MOCK_PROFILE, MOCK_BEASTS, Beast } from "@/data/mockData";
 import { BeastSvg } from "./BeastSvg";
 import { soundFX } from "@/game/SoundFX";
-import { User, Trophy, Swords, MapPin, Zap, Award, Wallet, ShieldCheck, ArrowRight } from "lucide-react";
+import { User, Trophy, Swords, MapPin, Zap, Award, Wallet, ShieldCheck, Flame } from "lucide-react";
+import { CREWS } from "@/data/warData";
 
 interface PlayerProfileProps {
   profile?: typeof MOCK_PROFILE;
   onSelectBeast: (beast: Beast) => void;
   onEnterArena: () => void;
+  userCrewId?: number;
 }
 
-export const PlayerProfile: React.FC<PlayerProfileProps> = ({ profile = MOCK_PROFILE, onSelectBeast, onEnterArena }) => {
+export const PlayerProfile: React.FC<PlayerProfileProps> = ({
+  profile = MOCK_PROFILE,
+  onSelectBeast,
+  onEnterArena,
+  userCrewId = 1,
+}) => {
+  const userCrew = CREWS.find((c) => c.id === userCrewId) || CREWS[0];
+
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4">
+    <div className="py-6 max-w-6xl mx-auto px-4">
       {/* Header Profile Card */}
-      <div className="arcade-card bg-white p-6 md:p-8 mb-8 relative">
+      <div className="bg-mh-navy border border-mh-border rounded-xl p-6 md:p-8 mb-6 shadow-2xl relative">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-arcade-yellow rounded-2xl border-4 border-arcade-black flex items-center justify-center text-4xl shadow-arcade">
+            <div className="w-16 h-16 rounded-xl bg-mh-card border border-mh-border flex items-center justify-center text-3xl shadow-inner">
               👑
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-3xl md:text-4xl font-black text-arcade-black tracking-tight">
+                <h1 className="font-display text-3xl md:text-4xl font-black text-white uppercase tracking-wide">
                   {profile.name}
                 </h1>
-                <span className="text-xs font-black px-2.5 py-0.5 bg-arcade-electric text-white rounded-md border border-arcade-black">
-                  LEVEL {profile.level}
+                <span className="mh-badge bg-mh-primary/20 border border-mh-primary text-mh-primaryGlow text-[10px]">
+                  <span>HUNTER LVL {profile.level}</span>
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-arcade-black/60">
+              <div className="flex items-center gap-2 text-xs font-mono text-mh-text2">
                 <span>{profile.address}</span>
-                <span className="text-arcade-electric font-black">• MONAD TESTNET</span>
+                <span className="text-mh-primary font-bold">• {userCrew.name}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <span className="text-[10px] font-black uppercase text-arcade-black/60 block">GLOBAL RANK</span>
-              <span className="text-2xl font-black text-arcade-black font-mono">{profile.rank}</span>
+          <div className="flex items-center gap-4">
+            <div className="text-right font-mono">
+              <span className="text-[10px] uppercase text-mh-text3 block">HUNTER RATING</span>
+              <span className="text-2xl font-black text-mh-reward">1,248 ELO</span>
             </div>
             <button
               onClick={() => {
                 soundFX.playClick();
                 onEnterArena();
               }}
-              className="arcade-btn py-3 px-5 bg-arcade-electric text-white rounded-xl text-xs flex items-center gap-2"
+              className="mh-btn text-xs py-2.5 px-4"
             >
-              <Swords className="w-4 h-4" />
-              BATTLE NOW
+              <span className="flex items-center gap-1.5">
+                <Swords className="w-4 h-4" /> ENTER ARENA
+              </span>
             </button>
           </div>
         </div>
 
-        {/* XP Progress Bar */}
-        <div className="mt-6 pt-6 border-t-2 border-arcade-black/10">
-          <div className="flex justify-between items-center text-xs font-black mb-1.5">
-            <span>LEVEL {profile.level} PROGRESS</span>
-            <span className="font-mono text-arcade-electric">
+        {/* Progress Bar */}
+        <div className="mt-6 pt-5 border-t border-mh-border/60">
+          <div className="flex justify-between items-center text-xs font-mono mb-1.5">
+            <span className="text-mh-text3">SEASON 01 LEVEL {profile.level} PROGRESS</span>
+            <span className="text-mh-primary font-bold">
               {profile.xp} / {profile.nextLevelXp} XP (76.8%)
             </span>
           </div>
-          <div className="w-full h-3 bg-warm-200 rounded-full border-2 border-arcade-black overflow-hidden">
+          <div className="w-full h-2.5 bg-[#07090E] rounded-full border border-mh-border overflow-hidden">
             <div
-              className="h-full bg-arcade-electric rounded-full transition-all"
+              className="h-full bg-mh-primary rounded-full transition-all"
               style={{ width: "76.8%" }}
             />
           </div>
         </div>
       </div>
 
-      {/* 4 Stats Highlights Cards */}
+      {/* 4 Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="arcade-card bg-arcade-mint p-5">
-          <span className="text-[10px] font-black uppercase text-arcade-black/70 block mb-1">TOTAL EARNED</span>
-          <div className="text-2xl font-black text-arcade-black font-mono">{profile.earnedMon}</div>
-          <span className="text-[11px] font-bold text-arcade-black/70">From arena victories</span>
+        <div className="bg-mh-card border border-mh-border rounded-xl p-4">
+          <span className="text-[10px] font-mono uppercase text-mh-text3 block mb-1">TOTAL BATTLES</span>
+          <div className="text-2xl font-black text-white font-mono">{profile.totalBattles}</div>
+          <span className="text-[11px] font-mono text-mh-text2">{profile.wins}W - {profile.losses}L ({profile.winRate})</span>
         </div>
 
-        <div className="arcade-card bg-arcade-yellow p-5">
-          <span className="text-[10px] font-black uppercase text-arcade-black/70 block mb-1">WIN RATE</span>
-          <div className="text-2xl font-black text-arcade-black font-mono">{profile.winRate}</div>
-          <span className="text-[11px] font-bold text-arcade-black/70">
-            {profile.wins}W - {profile.losses}L
-          </span>
+        <div className="bg-mh-card border border-mh-border rounded-xl p-4">
+          <span className="text-[10px] font-mono uppercase text-mh-text3 block mb-1">BEST WIN STREAK</span>
+          <div className="text-2xl font-black text-mh-win font-mono">7 STREAK</div>
+          <span className="text-[11px] font-mono text-mh-text2">Current: 4 Consecutive</span>
         </div>
 
-        <div className="arcade-card bg-arcade-coral p-5">
-          <span className="text-[10px] font-black uppercase text-arcade-black/70 block mb-1">MUMBAI LANDLORD</span>
-          <div className="text-2xl font-black text-arcade-black font-mono">
-            {profile.territoriesOwned} / 5 ZONES
+        <div className="bg-mh-card border border-mh-border rounded-xl p-4">
+          <span className="text-[10px] font-mono uppercase text-mh-text3 block mb-1">TERRITORIES CONQUERED</span>
+          <div className="text-2xl font-black text-mh-reward font-mono">
+            {profile.territoriesOwned} / 12 ZONES
           </div>
-          <span className="text-[11px] font-bold text-arcade-black/70">Collecting passive MON rent</span>
+          <span className="text-[11px] font-mono text-mh-text2">Mumbai Influence leader</span>
         </div>
 
-        <div className="arcade-card bg-arcade-purple p-5">
-          <span className="text-[10px] font-black uppercase text-arcade-black/70 block mb-1">BESTIARY UNLOCKED</span>
-          <div className="text-2xl font-black text-arcade-black font-mono">4 / 4 APEX</div>
-          <span className="text-[11px] font-bold text-arcade-black/70">100% Collection flex</span>
+        <div className="bg-mh-card border border-mh-border rounded-xl p-4">
+          <span className="text-[10px] font-mono uppercase text-mh-text3 block mb-1">CREW CONTRIBUTION</span>
+          <div className="text-2xl font-black text-mh-primary font-mono">+420 PTS</div>
+          <span className="text-[11px] font-mono text-mh-text2">To {userCrew.name}</span>
         </div>
       </div>
 
@@ -108,71 +116,52 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ profile = MOCK_PRO
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-arcade-yellow rounded border-2 border-arcade-black text-[10px] font-black uppercase shadow-arcade-sm mb-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-mh-card rounded border border-mh-border text-[10px] font-mono text-mh-reward uppercase mb-1">
               <span>📕 ON-CHAIN BESTIARY</span>
               <span>•</span>
-              <span className="text-emerald-700">VERIFIED METAMASK ROSTER</span>
+              <span className="text-mh-win">ERC-721 ROSTER</span>
             </div>
-            <h2 className="text-2xl font-black text-arcade-black tracking-tight">
-              MY BEAST ROSTER ({MOCK_BEASTS.length})
+            <h2 className="font-display text-2xl font-black text-white uppercase tracking-wide">
+              MY BEAST SQUAD ({MOCK_BEASTS.length})
             </h2>
           </div>
-          <span className="text-xs font-bold text-arcade-black/60 hidden sm:block">
-            Zero-Escrow: NFTs safely in your wallet
-          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {MOCK_BEASTS.slice(0, 3).map((beast) => (
-            <div key={beast.id} className="arcade-card bg-white p-5 flex flex-col justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {MOCK_BEASTS.map((beast) => (
+            <div
+              key={beast.id}
+              onClick={() => {
+                soundFX.playClick();
+                onSelectBeast(beast);
+              }}
+              className="bg-mh-card rounded-xl border border-mh-border p-4 cursor-pointer hover:border-mh-primary transition-all shadow-md group flex flex-col justify-between"
+            >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[11px] font-bold px-2 py-0.5 bg-warm-200 rounded border border-arcade-black">
-                    #{String(beast.tokenId).padStart(3, "0")}
-                  </span>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-arcade-yellow rounded border border-arcade-black">
-                    {beast.rarity}
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[10px] font-mono text-mh-text3">#{beast.tokenId}</span>
+                  <span className="mh-badge text-[9px] bg-mh-navy border border-mh-border text-mh-reward">
+                    <span>{beast.rarity}</span>
                   </span>
                 </div>
 
-                <div className="bg-warm-100 rounded-xl border-2 border-arcade-black p-3 flex justify-center mb-3">
-                  <BeastSvg id={beast.id} className="w-28 h-28" />
+                <div className="w-24 h-24 mx-auto my-2 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BeastSvg id={beast.id} className="w-20 h-20" animate={false} />
                 </div>
 
-                <h3 className="text-xl font-black text-arcade-black">{beast.name}</h3>
-                <p className="text-xs font-bold text-arcade-black/60 mb-3">
-                  Level {beast.level} • {beast.element} Element
-                </p>
+                <div className="font-display text-xl font-black uppercase text-white tracking-wide text-center">
+                  {beast.name}
+                </div>
+                <div className="text-xs font-mono text-mh-text3 text-center mb-3">
+                  Level {beast.level} • {beast.element}
+                </div>
               </div>
 
-              <button
-                onClick={() => {
-                  soundFX.playAttack();
-                  onSelectBeast(beast);
-                  onEnterArena();
-                }}
-                className="arcade-btn w-full py-2.5 bg-arcade-electric text-white rounded-xl text-xs flex items-center justify-center gap-1.5"
-              >
-                <Swords className="w-3.5 h-3.5" />
-                SELECT FOR BATTLE
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Achievement Badges */}
-      <div className="arcade-card bg-warm-50 p-6">
-        <h3 className="text-xl font-black text-arcade-black mb-4 flex items-center gap-2">
-          <Award className="w-5 h-5 text-amber-500" />
-          EARNED TROPHIES & REPUTATION
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {profile.badges.map((badge, i) => (
-            <div key={i} className="bg-white p-4 rounded-xl border-3 border-arcade-black shadow-arcade-sm">
-              <div className="text-3xl mb-2">{badge.icon}</div>
-              <div className="font-black text-sm text-arcade-black">{badge.title}</div>
-              <div className="text-xs font-bold text-arcade-black/60 mt-1">{badge.desc}</div>
+              <div className="bg-[#07090E] p-2 rounded border border-mh-border/60 text-[11px] font-mono flex justify-between">
+                <span>ATK: {beast.attack}</span>
+                <span>DEF: {beast.defense}</span>
+                <span>SPD: {beast.speed}</span>
+              </div>
             </div>
           ))}
         </div>
