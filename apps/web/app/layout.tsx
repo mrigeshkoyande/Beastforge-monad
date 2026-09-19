@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { GameProvider } from "@/context/GameContext";
+import { CustomCursor } from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: "MONAD HUNT 🐲 | Catch. Stake. Battle. Conquer.",
@@ -20,7 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col bg-[#05070B] text-white antialiased selection:bg-[#E63946] selection:text-white">
-        <GameProvider>{children}</GameProvider>
+        <GameProvider>
+          <CustomCursor />
+          {children}
+        </GameProvider>
       </body>
     </html>
   );
