@@ -1,0 +1,33 @@
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="mh-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E63946" />
+      <stop offset="50%" stop-color="#8B1E2D" />
+      <stop offset="100%" stop-color="#457B9D" />
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F4D35E" />
+      <stop offset="100%" stop-color="#EB7F31" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0B0E14" />
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="#161B26" stroke="#232B3B" stroke-width="2" />
+  <polygon points="32,8 54,20 46,48 32,58 18,48 10,20" fill="url(#mh-glow)" opacity="0.9" />
+  <polygon points="32,14 48,24 42,46 32,53 22,46 16,24" fill="#10141D" />
+  <polygon points="32,16 38,28 32,24 26,28" fill="url(#gold-grad)" />
+  <circle cx="32" cy="34" r="5" fill="#F4D35E" />
+  <polygon points="32,29 35,34 32,39 29,34" fill="#E63946" />
+  <path d="M22,38 L26,44 L20,43 Z" fill="#457B9D" />
+  <path d="M42,38 L38,44 L44,43 Z" fill="#457B9D" />
+</svg>`;
+
+  return new NextResponse(svg, {
+    headers: {
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=86400",
+    },
+  });
+}

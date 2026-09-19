@@ -12,14 +12,18 @@
   --mh-card-hover: #1E2535;
   --mh-border: #232B3B;
 
-  /* Monad Identity */
-  --mh-primary: #836EF9;
-  --mh-primary-glow: #A594FF;
+  /* Official Palette: Maroon, Energy Crimson, Solar Gold, Steel Cyan */
+  --mh-maroon: #8B1E2D; /* rgb(139, 30, 45) */
+  --mh-crimson: #E63946; /* rgb(230, 57, 70) */
+  --mh-gold: #F4D35E; /* rgb(244, 211, 94) */
+  --mh-steel: #457B9D; /* rgb(69, 123, 157) */
 
   /* Semantic Accents */
-  --mh-live: #FF1A2A;   /* LIVE indicators & Attack state ONLY */
-  --mh-reward: #FFCC00; /* Rating gains, achievements, championship */
-  --mh-defend: #00B0FF; /* Defending / stable territory */
+  --mh-primary: #E63946;
+  --mh-primary-glow: #FF5B69;
+  --mh-live: #E63946;   /* LIVE indicators & Attack state ONLY */
+  --mh-reward: #F4D35E; /* Rating gains, achievements, championship */
+  --mh-defend: #457B9D; /* Defending / stable territory */
   --mh-win: #00E676;    /* Victory / verified */
   --mh-silver: #8F9DAE;
 
@@ -39,7 +43,7 @@ body {
 /* Monad Obsidian Scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #836EF9 #0B0E14;
+  scrollbar-color: #E63946 #0B0E14;
 }
 
 ::-webkit-scrollbar {
@@ -57,7 +61,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #836EF9;
+  background: #E63946;
 }
 
 /* Signature Monad 12-deg Angled Buttons & Elements */
@@ -71,8 +75,8 @@ body {
   letter-spacing: 0.05em;
   transform: skewX(-12deg);
   transition: all 0.15s ease-in-out;
-  border: 1px solid var(--mh-border);
-  background: var(--mh-primary);
+  border: 1px solid var(--mh-maroon);
+  background: linear-gradient(135deg, #E63946 0%, #8B1E2D 100%);
   color: #FFFFFF;
   padding: 0.6rem 1.4rem;
   border-radius: 4px;
@@ -83,8 +87,8 @@ body {
 }
 
 .mh-btn:hover {
-  background: var(--mh-primary-glow);
-  box-shadow: 0 0 15px rgba(131, 110, 249, 0.5);
+  background: linear-gradient(135deg, #FF5B69 0%, #A82020 100%);
+  box-shadow: 0 0 16px rgba(230, 57, 70, 0.5);
 }
 
 .mh-btn:active {
@@ -99,17 +103,29 @@ body {
 
 .mh-btn-secondary:hover {
   background: #1E2535;
-  border-color: #836EF9;
+  border-color: #457B9D;
+  box-shadow: 0 0 12px rgba(69, 123, 157, 0.3);
+}
+
+.mh-btn-gold {
+  background: linear-gradient(135deg, #F4D35E 0%, #EB7F31 100%);
+  border-color: #F4D35E;
+  color: #0B0E14;
+}
+
+.mh-btn-gold:hover {
+  background: linear-gradient(135deg, #FFE082 0%, #F4D35E 100%);
+  box-shadow: 0 0 16px rgba(244, 211, 94, 0.5);
 }
 
 .mh-btn-live {
-  background: #FF1A2A;
-  border-color: #FF1A2A;
+  background: #E63946;
+  border-color: #8B1E2D;
 }
 
 .mh-btn-live:hover {
   background: #FF4D5B;
-  box-shadow: 0 0 15px rgba(255, 26, 42, 0.6);
+  box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
 }
 
 .mh-badge {
@@ -143,7 +159,7 @@ body {
 }
 
 .mh-card:hover {
-  border-color: rgba(131, 110, 249, 0.4);
+  border-color: rgba(230, 57, 70, 0.4);
 }
 
 /* Animations */
