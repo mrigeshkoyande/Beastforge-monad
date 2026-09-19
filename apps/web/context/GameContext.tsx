@@ -22,6 +22,7 @@ export interface GameContextType {
   isDemoMode: boolean;
   walletError: string | null;
   setIsDemoMode: (val: boolean) => void;
+  activateDemoMode: () => void;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
 
@@ -171,15 +172,43 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [web3Service]);
 
+  const activateDemoMode = useCallback(() => {
+    setWalletConnected(true);
+    setWalletAddress("0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F");
+    setMonBalance("5.00 MON");
+    setIsDemoMode(true);
+    setWalletError(null);
+    setIsConsoleOpen(false);
+    setTxProgress(null);
+  }, []);
+
   const connectWallet = useCallback(async () => {
     setWalletError(null);
     setIsConsoleOpen(true);
     setTxProgress({
       status: "SIGN",
-      title: "Connecting to Monad Testnet via MetaMask...",
+      title: "Connecting to Monad Testnet (Chain ID 10143)...",
     });
 
     try {
+      const win = typeof window !== "undefined" ? (window as any) : null;
+      if (!win?.ethereum) {
+        // No wallet extension installed: activate Demo Hunter mode immediately
+        setWalletConnected(true);
+        setWalletAddress("0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F");
+        setMonBalance("5.00 MON");
+        setIsDemoMode(true);
+        setTxProgress({
+          status: "SETTLED",
+          title: "Connected: 0x71C9...8A2F (Simulated Demo Mode)",
+        });
+        setTimeout(() => {
+          setIsConsoleOpen(false);
+          setTxProgress(null);
+        }, 1200);
+        return;
+      }
+
       const realService = getWeb3Service("REAL");
       const { address, balance } = await realService.connectWallet();
       setWalletConnected(true);
@@ -188,20 +217,29 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsDemoMode(false);
       setTxProgress({
         status: "SETTLED",
-        title: `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`,
+        title: `Connected: ${address.slice(0, 6)}...${address.slice(-4)} (Monad Testnet)`,
       });
       setTimeout(() => {
         setIsConsoleOpen(false);
         setTxProgress(null);
-      }, 1000);
+      }, 1200);
     } catch (err: unknown) {
       const e = err as Error;
-      setWalletError(e.message || "Failed to connect wallet.");
+      console.warn("Wallet connect fallback to demo:", e.message);
+      // Automatically activate demo hunter account so the user is never stuck
+      setWalletConnected(true);
+      setWalletAddress("0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F");
+      setMonBalance("5.00 MON");
+      setIsDemoMode(true);
+      setWalletError(null);
       setTxProgress({
-        status: "ERROR",
-        title: "Connection Failed",
-        errorMessage: e.message || "Could not connect to wallet.",
+        status: "SETTLED",
+        title: "Connected: 0x71C9...8A2F (Simulated Demo Hunter)",
       });
+      setTimeout(() => {
+        setIsConsoleOpen(false);
+        setTxProgress(null);
+      }, 1200);
     }
   }, []);
 
@@ -490,6 +528,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isDemoMode,
         walletError,
         setIsDemoMode,
+        activateDemoMode,
         connectWallet,
         disconnectWallet,
         playerBeast,

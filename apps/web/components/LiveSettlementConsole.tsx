@@ -185,7 +185,7 @@ export const LiveSettlementConsole: React.FC<LiveSettlementConsoleProps> = ({
               onClick={onClose}
               className="mh-btn w-full text-center py-2.5"
             >
-              <span>CONTINUE TO BATTLE REPORT</span>
+              <span>{isError ? "CLOSE & CONTINUE" : "CONTINUE"}</span>
             </button>
           )}
         </div>
