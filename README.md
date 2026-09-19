@@ -1,4 +1,4 @@
-# 🐲 MONAD HUNT: CITY LEAGUE
+# 🐲 MONAD HUNT:CITY LEAGUE
 *Catch. Stake. Battle. Conquer.*
 
 A persistent competitive on-chain cyberpunk gaming world where **Hunters** and their **AI Beasts** battle for territorial dominance across **Mumbai's 12 proving grounds**, climb an integer Elo rating ladder, represent **4 Faction Syndicates**, and settle every battle cryptographically on **Monad Testnet**.
