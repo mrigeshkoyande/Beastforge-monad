@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // standalone output is enabled only inside Docker (NEXT_STANDALONE=true)
-  // This prevents the dev server from breaking static asset serving
-  ...(process.env.NEXT_STANDALONE === "true" ? { output: "standalone" } : {}),
+  output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [],
