@@ -136,27 +136,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           className="absolute inset-0 w-full h-full object-cover opacity-20 filter contrast-125 brightness-75 scale-105"
         />
 
-        {/* Mumbai City & Beast Artwork Layer */}
+        {/* Mumbai City & Beast Artwork Layer (Clean High-Res Art) */}
         <div className="absolute inset-0">
           <Image
             src="/assets/hero/mumbai-beast-hero.jpg"
-            alt="Futuristic Mumbai City & Monad Beast"
+            alt="Futuristic Cyber Mumbai & Cyber Beast"
             fill
             sizes="100vw"
             priority
-            className="object-cover object-right opacity-60 filter brightness-90 contrast-125"
+            className="object-cover object-center opacity-75 filter brightness-95 contrast-110"
           />
         </div>
 
-        {/* Deep Solid Gradient Mask on the Left to completely eliminate double text from mockup image */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B] via-[#05070B] via-48% to-transparent z-1" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-transparent to-[#05070B]/70 z-1" />
+        {/* Smooth Cinematic Dark Gradient Overlay for Maximum Text Legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070B]/95 via-[#05070B]/80 via-40% to-transparent z-1" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070B] via-transparent to-[#05070B]/60 z-1" />
 
         {/* Tactical Scanlines & Atmospheric Glows */}
-        <div className="absolute inset-0 tactical-scanline opacity-25 z-1 pointer-events-none" />
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#8B1E2D]/25 blur-[130px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/3 w-[500px] h-[500px] bg-[#E63946]/20 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute top-1/3 right-10 w-80 h-80 bg-[#457B9D]/20 blur-[110px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 tactical-scanline opacity-15 z-1 pointer-events-none" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#8B1E2D]/20 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-1/3 right-1/3 w-[500px] h-[500px] bg-[#E63946]/15 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 right-10 w-80 h-80 bg-[#457B9D]/15 blur-[110px] rounded-full pointer-events-none" />
       </div>
 
       {/* 2. Floating Upper Right Beast HUD Card */}
