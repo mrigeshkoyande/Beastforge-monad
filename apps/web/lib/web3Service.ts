@@ -1,40 +1,62 @@
-import { createPublicClient, http, parseEther, formatEther } from "viem";
+import { createPublicClient, http, formatEther, encodeFunctionData } from "viem";
 import { monadTestnet } from "./monadChain";
 import { CONTRACT_ADDRESSES } from "./contractAddresses";
-import { BEAST_NFT_ABI, ARENA_ABI, TERRITORY_ABI } from "./contractAbis";
+import { BEAST_NFT_ABI, HUNT_CORE_ABI } from "./contractAbis";
 
 export type Web3Mode = "REAL" | "DEMO";
 
-export type TxStatus = "IDLE" | "WAITING_SIGNATURE" | "PENDING" | "CONFIRMED" | "ERROR";
+export type TxStepStatus = "IDLE" | "SIGN" | "SUBMITTED" | "CONFIRMING" | "SETTLED" | "ERROR";
+
+export interface SettlementMetrics {
+  txHash: string;
+  blockNumber?: bigint | number;
+  gasUsed?: bigint | number;
+  latencyMs?: number;
+  signer?: string;
+  status: "SETTLED" | "PENDING" | "ERROR";
+  explorerUrl?: string;
+}
 
 export interface TxProgress {
-  status: TxStatus;
+  status: TxStepStatus;
   title: string;
   txHash?: string;
+  blockNumber?: bigint | number;
+  gasUsed?: bigint | number;
+  latencyMs?: number;
   explorerUrl?: string;
   errorMessage?: string;
 }
 
-export interface ResolveBattleParams {
+export interface OnChainBattleResult {
   battleId: string;
+  player: string;
   winner: string;
-  rewardAmount: string;
+  loser: string;
+  playerTokenId: number;
+  opponentTokenId: number;
+  territoryId: number;
+  rounds: number;
   nonce: number;
   deadline: number;
-  signature: string;
 }
 
 export interface IWeb3Service {
   mode: Web3Mode;
   connectWallet(): Promise<{ address: string; balance: string }>;
   getBalance(address: string): Promise<string>;
-  mintBeast(to: string, name: string, rarity: number, onProgress?: (p: TxProgress) => void): Promise<{ txHash: string; tokenId: number }>;
-  enterArena(battleId: string, tokenId: number, territoryId: number, feeMon: string, onProgress?: (p: TxProgress) => void): Promise<{ txHash: string }>;
-  resolveBattle(params: ResolveBattleParams, onProgress?: (p: TxProgress) => void): Promise<{ txHash: string }>;
-  getTerritoryOwner(territoryId: number): Promise<string>;
+  mintStarterBeast(to: string, onProgress?: (p: TxProgress) => void): Promise<{ txHash: string; tokenId: number }>;
+  joinCrew(crewId: number, onProgress?: (p: TxProgress) => void): Promise<{ txHash: string }>;
+  settleBattle(
+    battleResult: OnChainBattleResult,
+    signature: string,
+    onProgress?: (p: TxProgress) => void
+  ): Promise<SettlementMetrics>;
+  getHunter(address: string): Promise<any>;
+  getTerritory(territoryId: number): Promise<any>;
 }
 
-// 1. DEMO SERVICE (Fast, offline, zero-network failures for hackathon judging)
+// 1. DEMO SERVICE (Honest simulation with SIMULATED tagging, no fake tx hashes or fake explorer links)
 export class DemoMonadService implements IWeb3Service {
   public mode: Web3Mode = "DEMO";
 
@@ -49,102 +71,117 @@ export class DemoMonadService implements IWeb3Service {
     return "8.42 MON";
   }
 
-  public async mintBeast(
-    to: string,
-    name: string,
-    _rarity: number,
+  public async mintStarterBeast(
+    _to: string,
     onProgress?: (p: TxProgress) => void
   ): Promise<{ txHash: string; tokenId: number }> {
     onProgress?.({
-      status: "WAITING_SIGNATURE",
-      title: `Signing Mint for ${name}...`,
+      status: "SIGN",
+      title: "Simulating Starter Beast Claim...",
+    });
+    await new Promise((r) => setTimeout(r, 600));
+
+    onProgress?.({
+      status: "CONFIRMING",
+      title: "Minting Starter Beast (Simulated)...",
     });
     await new Promise((r) => setTimeout(r, 800));
 
-    const simulatedHash = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    const tokenId = Math.floor(Math.random() * 400 + 100);
     onProgress?.({
-      status: "PENDING",
-      title: "Mining on Monad Testnet (Demo)...",
-      txHash: simulatedHash,
-      explorerUrl: `https://testnet.monadexplorer.com/tx/${simulatedHash}`,
-    });
-    await new Promise((r) => setTimeout(r, 1200));
-
-    const tokenId = Math.floor(Math.random() * 800 + 100);
-    onProgress?.({
-      status: "CONFIRMED",
-      title: `Mint Confirmed! Token ID #${tokenId}`,
-      txHash: simulatedHash,
-      explorerUrl: `https://testnet.monadexplorer.com/tx/${simulatedHash}`,
+      status: "SETTLED",
+      title: `Starter Beast Claimed (Demo Token #${tokenId})`,
     });
 
-    return { txHash: simulatedHash, tokenId };
+    return { txHash: "SIMULATED_MINT_TX", tokenId };
   }
 
-  public async enterArena(
-    battleId: string,
-    tokenId: number,
-    territoryId: number,
-    feeMon: string,
+  public async joinCrew(
+    _crewId: number,
     onProgress?: (p: TxProgress) => void
   ): Promise<{ txHash: string }> {
     onProgress?.({
-      status: "WAITING_SIGNATURE",
-      title: `Approving ${feeMon} MON entry stake for Battle #${tokenId}...`,
+      status: "SIGN",
+      title: "Joining Crew in Demo Mode...",
     });
-    await new Promise((r) => setTimeout(r, 800));
-
-    const simulatedHash = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    await new Promise((r) => setTimeout(r, 500));
     onProgress?.({
-      status: "PENDING",
-      title: "Submitting 0.1 MON stake to Arena Contract...",
-      txHash: simulatedHash,
-      explorerUrl: `https://testnet.monadexplorer.com/tx/${simulatedHash}`,
+      status: "SETTLED",
+      title: "Crew Joined (Simulated)",
     });
-    await new Promise((r) => setTimeout(r, 1200));
-
-    onProgress?.({
-      status: "CONFIRMED",
-      title: "Stake Confirmed! Battle Ready!",
-      txHash: simulatedHash,
-      explorerUrl: `https://testnet.monadexplorer.com/tx/${simulatedHash}`,
-    });
-
-    return { txHash: simulatedHash };
+    return { txHash: "SIMULATED_JOIN_CREW" };
   }
 
-  public async resolveBattle(
-    params: ResolveBattleParams,
+  public async settleBattle(
+    _battleResult: OnChainBattleResult,
+    _signature: string,
     onProgress?: (p: TxProgress) => void
-  ): Promise<{ txHash: string }> {
+  ): Promise<SettlementMetrics> {
+    const startTime = Date.now();
     onProgress?.({
-      status: "PENDING",
-      title: "Verifying Cryptographic Oracle Signature on Monad...",
+      status: "SIGN",
+      title: "Simulating EIP-712 Settlement Signing...",
     });
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 600));
 
-    const simulatedHash = "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
     onProgress?.({
-      status: "CONFIRMED",
-      title: `Victory Settled! Rewarded ${params.rewardAmount} MON & Territory Captured!`,
-      txHash: simulatedHash,
-      explorerUrl: `https://testnet.monadexplorer.com/tx/${simulatedHash}`,
+      status: "SUBMITTED",
+      title: "Settlement Broadcasted (Simulated)...",
+      txHash: "SIMULATED_SETTLEMENT_TX",
+    });
+    await new Promise((r) => setTimeout(r, 700));
+
+    const elapsed = Date.now() - startTime;
+    const metrics: SettlementMetrics = {
+      txHash: "SIMULATED_SETTLEMENT_TX",
+      blockNumber: 1084221,
+      gasUsed: 84210,
+      latencyMs: elapsed,
+      signer: "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+      status: "SETTLED",
+    };
+
+    onProgress?.({
+      status: "SETTLED",
+      title: "Battle Settled (Simulated Mode)",
+      txHash: metrics.txHash,
+      blockNumber: metrics.blockNumber,
+      gasUsed: metrics.gasUsed,
+      latencyMs: metrics.latencyMs,
     });
 
-    return { txHash: simulatedHash };
+    return metrics;
   }
 
-  public async getTerritoryOwner(_territoryId: number): Promise<string> {
-    return "0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F";
+  public async getHunter(_address: string): Promise<any> {
+    return {
+      rating: 1250,
+      wins: 14,
+      losses: 3,
+      streak: 4,
+      bestStreak: 7,
+      crewId: 1,
+      registered: true,
+    };
+  }
+
+  public async getTerritory(_territoryId: number): Promise<any> {
+    return {
+      id: 3,
+      name: "POWAI TECH HUB",
+      controllingCrew: 3,
+      energy: 1450,
+      battleCount: 42,
+    };
   }
 }
 
-// 2. REAL MONAD TESTNET SERVICE (Uses viem / MetaMask / Browser wallet on Monad 10143)
+// 2. REAL MONAD TESTNET SERVICE (Live Viem + MetaMask on Monad Testnet 10143)
 export class RealMonadService implements IWeb3Service {
   public mode: Web3Mode = "REAL";
-  private publicClient = createPublicClient({
+  public publicClient = createPublicClient({
     chain: monadTestnet,
-    transport: http(),
+    transport: http("https://testnet-rpc.monad.xyz/"),
   });
 
   private getEthereum(): any {
@@ -161,18 +198,16 @@ export class RealMonadService implements IWeb3Service {
 
   public async connectWallet(): Promise<{ address: string; balance: string }> {
     const ethereum = this.getEthereum();
-
     if (!ethereum) {
-      throw new Error("No Web3 wallet detected. Please install MetaMask or use Simulated Mode.");
+      throw new Error("No Web3 wallet detected. Please install MetaMask to interact with Monad Testnet.");
     }
 
-    // 1. Request accounts first (opens MetaMask connection prompt)
     let accounts: string[] = [];
     try {
       accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[];
     } catch (err: any) {
       if (err?.code === -32002) {
-        throw new Error("MetaMask request is already pending. Please click the fox icon in your browser toolbar to approve.");
+        throw new Error("MetaMask request is already pending. Please approve in your wallet.");
       }
       if (err?.code === 4001) {
         throw new Error("MetaMask connection rejected by user.");
@@ -185,11 +220,11 @@ export class RealMonadService implements IWeb3Service {
     }
     const address = accounts[0];
 
-    // 2. Switch or add Monad Testnet (10143)
+    // Ensure Monad Testnet (10143 / 0x279f) is active
     try {
       await ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x279f" }], // 10143 in hex
+        params: [{ chainId: "0x279f" }],
       });
     } catch (switchError: any) {
       if (switchError?.code === 4902 || switchError?.data?.originalError?.code === 4902 || switchError?.message?.includes("Unrecognized")) {
@@ -207,7 +242,7 @@ export class RealMonadService implements IWeb3Service {
             ],
           });
         } catch {
-          // Continue if already added
+          // ignore if already present
         }
       }
     }
@@ -215,108 +250,107 @@ export class RealMonadService implements IWeb3Service {
     let balanceStr = "0.00 MON";
     try {
       const balanceWei = await this.publicClient.getBalance({ address: address as `0x${string}` });
-      balanceStr = `${parseFloat(formatEther(balanceWei)).toFixed(2)} MON`;
+      balanceStr = `${parseFloat(formatEther(balanceWei)).toFixed(3)} MON`;
     } catch {
       balanceStr = "0.00 MON";
     }
 
-    return {
-      address,
-      balance: balanceStr,
-    };
+    return { address, balance: balanceStr };
   }
 
   public async getBalance(address: string): Promise<string> {
     try {
       const balanceWei = await this.publicClient.getBalance({ address: address as `0x${string}` });
-      return `${parseFloat(formatEther(balanceWei)).toFixed(2)} MON`;
+      return `${parseFloat(formatEther(balanceWei)).toFixed(3)} MON`;
     } catch {
-      return "8.42 MON";
+      return "0.00 MON";
     }
   }
 
-  public async mintBeast(
+  public async mintStarterBeast(
     to: string,
-    name: string,
-    rarity: number,
     onProgress?: (p: TxProgress) => void
   ): Promise<{ txHash: string; tokenId: number }> {
     onProgress?.({
-      status: "WAITING_SIGNATURE",
-      title: "Confirm Mint Transaction in Wallet...",
+      status: "SIGN",
+      title: "Confirm Starter Beast Mint in MetaMask...",
     });
 
-    const ethereum = this.getEthereum() as {
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-    } | null;
-
+    const ethereum = this.getEthereum();
     if (!ethereum) throw new Error("Wallet not connected");
 
-    // Real wallet interaction via eth_sendTransaction
+    const data = encodeFunctionData({
+      abi: BEAST_NFT_ABI,
+      functionName: "mintStarter",
+      args: [to as `0x${string}`],
+    });
+
+    const startTime = Date.now();
     const txHash = (await ethereum.request({
       method: "eth_sendTransaction",
       params: [
         {
           from: to,
           to: CONTRACT_ADDRESSES.BEAST_NFT,
-          data: "0x", // In production uses encoded function data
-          value: "0x0",
+          data,
         },
       ],
     })) as string;
 
     onProgress?.({
-      status: "PENDING",
-      title: "Confirming on Monad Block Explorer...",
+      status: "CONFIRMING",
+      title: "Minting Starter Beast on Monad Testnet...",
       txHash,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
     });
 
-    await new Promise((r) => setTimeout(r, 2000));
+    const receipt = await this.publicClient.waitForTransactionReceipt({
+      hash: txHash as `0x${string}`,
+    });
 
+    const elapsed = Date.now() - startTime;
     onProgress?.({
-      status: "CONFIRMED",
-      title: `Minted ${name} successfully!`,
+      status: "SETTLED",
+      title: "Starter Beast Mint Confirmed!",
       txHash,
+      blockNumber: receipt.blockNumber,
+      gasUsed: receipt.gasUsed,
+      latencyMs: elapsed,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
     });
 
-    return { txHash, tokenId: 27 };
+    return { txHash, tokenId: 1 };
   }
 
-  public async enterArena(
-    battleId: string,
-    tokenId: number,
-    territoryId: number,
-    feeMon: string,
+  public async joinCrew(
+    crewId: number,
     onProgress?: (p: TxProgress) => void
   ): Promise<{ txHash: string }> {
-    onProgress?.({
-      status: "WAITING_SIGNATURE",
-      title: `Confirm 0.1 MON Entry Stake for Battle #${tokenId}...`,
-    });
-
-    const ethereum = this.getEthereum() as {
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-    } | null;
+    const ethereum = this.getEthereum();
     if (!ethereum) throw new Error("Wallet not connected");
 
     const accounts = (await ethereum.request({ method: "eth_accounts" })) as string[];
+    const from = accounts[0];
+
+    onProgress?.({
+      status: "SIGN",
+      title: "Confirm Crew Allegiance in MetaMask...",
+    });
+
+    const data = encodeFunctionData({
+      abi: HUNT_CORE_ABI,
+      functionName: "joinCrew",
+      args: [crewId],
+    });
 
     const txHash = (await ethereum.request({
       method: "eth_sendTransaction",
-      params: [
-        {
-          from: accounts[0],
-          to: CONTRACT_ADDRESSES.ARENA,
-          value: "0x16345785d8a0000", // 0.1 MON in hex (0.1 * 10^18)
-        },
-      ],
+      params: [{ from, to: CONTRACT_ADDRESSES.HUNT_CORE, data }],
     })) as string;
 
     onProgress?.({
-      status: "PENDING",
-      title: "Locking stake on Monad Testnet...",
+      status: "CONFIRMING",
+      title: "Registering Crew on Monad Testnet...",
       txHash,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
     });
@@ -326,8 +360,8 @@ export class RealMonadService implements IWeb3Service {
     });
 
     onProgress?.({
-      status: "CONFIRMED",
-      title: "Stake Locked! Arena Battle Authorized!",
+      status: "SETTLED",
+      title: "Crew Joined Successfully!",
       txHash,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
     });
@@ -335,78 +369,119 @@ export class RealMonadService implements IWeb3Service {
     return { txHash };
   }
 
-  public async resolveBattle(
-    params: ResolveBattleParams,
+  public async settleBattle(
+    battleResult: OnChainBattleResult,
+    signature: string,
     onProgress?: (p: TxProgress) => void
-  ): Promise<{ txHash: string }> {
-    onProgress?.({
-      status: "PENDING",
-      title: "Submitting Settlement to Monad ArenaCore Contract...",
-    });
-
-    const ethereum = this.getEthereum() as {
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-    } | null;
-
-    if (!ethereum) {
-      throw new Error("Wallet not connected for live settlement on Monad Testnet.");
-    }
+  ): Promise<SettlementMetrics> {
+    const ethereum = this.getEthereum();
+    if (!ethereum) throw new Error("Wallet not connected for live settlement");
 
     const accounts = (await ethereum.request({ method: "eth_accounts" })) as string[];
-    if (!accounts || accounts.length === 0) {
-      throw new Error("No active account detected in wallet for on-chain settlement.");
-    }
+    const from = accounts[0];
 
-    // Submit live on-chain settlement call
+    onProgress?.({
+      status: "SIGN",
+      title: "Prompting Wallet for On-Chain Settlement Submission...",
+    });
+
+    const battleStruct = {
+      battleId: battleResult.battleId as `0x${string}`,
+      player: battleResult.player as `0x${string}`,
+      winner: battleResult.winner as `0x${string}`,
+      loser: battleResult.loser as `0x${string}`,
+      playerTokenId: BigInt(battleResult.playerTokenId),
+      opponentTokenId: BigInt(battleResult.opponentTokenId),
+      territoryId: battleResult.territoryId,
+      rounds: battleResult.rounds,
+      nonce: BigInt(battleResult.nonce),
+      deadline: BigInt(battleResult.deadline),
+    };
+
+    const data = encodeFunctionData({
+      abi: HUNT_CORE_ABI,
+      functionName: "settleBattle",
+      args: [battleStruct, signature as `0x${string}`],
+    });
+
+    const startTime = Date.now();
     const txHash = (await ethereum.request({
       method: "eth_sendTransaction",
-      params: [
-        {
-          from: accounts[0],
-          to: CONTRACT_ADDRESSES.ARENA,
-          data: "0x", // In production encoded ABI call
-          value: "0x0",
-        },
-      ],
+      params: [{ from, to: CONTRACT_ADDRESSES.HUNT_CORE, data }],
     })) as string;
 
     onProgress?.({
-      status: "PENDING",
-      title: "Confirming settlement on Monad Explorer...",
+      status: "SUBMITTED",
+      title: "Settlement Transaction Submitted",
       txHash,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
-    });
-
-    await this.publicClient.waitForTransactionReceipt({
-      hash: txHash as `0x${string}`,
     });
 
     onProgress?.({
-      status: "CONFIRMED",
-      title: `Monad Tx Verified! +${params.rewardAmount} MON sent to winner!`,
+      status: "CONFIRMING",
+      title: "Waiting for Monad Testnet Block Receipt...",
       txHash,
       explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
     });
 
-    return { txHash };
+    const receipt = await this.publicClient.waitForTransactionReceipt({
+      hash: txHash as `0x${string}`,
+    });
+
+    const latencyMs = Date.now() - startTime;
+
+    const metrics: SettlementMetrics = {
+      txHash,
+      blockNumber: receipt.blockNumber,
+      gasUsed: receipt.gasUsed,
+      latencyMs,
+      signer: CONTRACT_ADDRESSES.SETTLER,
+      status: receipt.status === "success" ? "SETTLED" : "ERROR",
+      explorerUrl: `https://testnet.monadexplorer.com/tx/${txHash}`,
+    };
+
+    onProgress?.({
+      status: "SETTLED",
+      title: "Battle Settled On-Chain!",
+      txHash: metrics.txHash,
+      blockNumber: metrics.blockNumber,
+      gasUsed: metrics.gasUsed,
+      latencyMs: metrics.latencyMs,
+      explorerUrl: metrics.explorerUrl,
+    });
+
+    return metrics;
   }
 
-  public async getTerritoryOwner(territoryId: number): Promise<string> {
+  public async getHunter(address: string): Promise<any> {
     try {
-      const owner = await this.publicClient.readContract({
-        address: CONTRACT_ADDRESSES.TERRITORY,
-        abi: TERRITORY_ABI,
-        functionName: "ownerOfTerritory",
-        args: [BigInt(territoryId)],
+      const hunter = await this.publicClient.readContract({
+        address: CONTRACT_ADDRESSES.HUNT_CORE,
+        abi: HUNT_CORE_ABI,
+        functionName: "getHunter",
+        args: [address as `0x${string}`],
       });
-      return owner as string;
+      return hunter;
     } catch {
-      return "0x71C9347B95F4D3501A39D9eEb5C2D2B095208A2F";
+      return null;
+    }
+  }
+
+  public async getTerritory(territoryId: number): Promise<any> {
+    try {
+      const data = await this.publicClient.readContract({
+        address: CONTRACT_ADDRESSES.HUNT_CORE,
+        abi: HUNT_CORE_ABI,
+        functionName: "getTerritory",
+        args: [territoryId],
+      });
+      return data;
+    } catch {
+      return null;
     }
   }
 }
 
-// Factory function
 export function getWeb3Service(mode: Web3Mode): IWeb3Service {
   if (mode === "REAL") {
     return new RealMonadService();
