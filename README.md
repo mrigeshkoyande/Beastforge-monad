@@ -1,4 +1,4 @@
-# 🐲 MONAD HUNT: CITY LEAGUE
+# 🐲 MONAD HUNT:CITY LEAGUE
 *Catch. Stake. Battle. Conquer.*
 
 A persistent competitive on-chain game world where **Hunters** and their **Beasts** battle for territorial control of **Mumbai's 12 proving grounds**, climb an Elo rating ladder, represent **4 Faction Crews**, and settle every single battle on **Monad Testnet**.
