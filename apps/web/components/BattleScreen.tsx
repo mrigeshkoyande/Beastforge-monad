@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Beast, Territory } from "@/data/mockData";
 import { BeastSvg } from "./BeastSvg";
 import { soundFX } from "@/game/SoundFX";
@@ -29,7 +29,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   onBattleEnd,
   onExit,
 }) => {
-  const [recordedMoves, setRecordedMoves] = useState<CombatAction[]>([]);
+  const movesRef = useRef<CombatAction[]>([]);
   const [engine] = useState(() => {
     return new BattleEngine({
       battleId: `battle_${Date.now()}`,
@@ -84,7 +84,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     (action: CombatAction) => {
       if (isProcessing || playerHp <= 0 || opponentHp <= 0) return;
       setIsProcessing(true);
-      setRecordedMoves((prev) => [...prev, action]);
+      movesRef.current.push(action);
 
       let actionDesc = "";
       if (action === "SPECIAL") {
@@ -168,13 +168,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         if (state.winner) {
           setTimeout(() => {
             const allLogs = combatLogs.map((l) => l.text);
-            const moves = [...recordedMoves, action];
-            onBattleEnd(state.winner === "PLAYER", allLogs, moves);
+            onBattleEnd(state.winner === "PLAYER", allLogs, [...movesRef.current]);
           }, 800);
         }
       }, 700);
     },
-    [isProcessing, playerHp, opponentHp, engine, playerBeast, opponentBeast, combatLogs, onBattleEnd, recordedMoves]
+    [isProcessing, playerHp, opponentHp, engine, playerBeast, opponentBeast, combatLogs, onBattleEnd]
   );
 
   // Auto-battle loop
