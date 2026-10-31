@@ -132,15 +132,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const activeMode: Web3Mode = isDemoMode ? "DEMO" : "REAL";
   const web3Service = getWeb3Service(activeMode);
 
-  // Auto-detect previously connected Ethereum account on load
+  // Auto-detect previously connected Ethereum account on load (run once on mount)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const win = window as any;
+    const svc = getWeb3Service(isDemoMode ? "DEMO" : "REAL");
+
     if (win.ethereum && win.ethereum.selectedAddress) {
       setWalletAddress(win.ethereum.selectedAddress);
       setWalletConnected(true);
       setIsDemoMode(false);
-      web3Service.getBalance(win.ethereum.selectedAddress).then((bal) => setMonBalance(bal));
+      svc.getBalance(win.ethereum.selectedAddress).then((bal) => setMonBalance(bal));
     }
 
     if (win.ethereum?.on) {
@@ -154,7 +156,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setWalletAddress(accounts[0]);
           setWalletConnected(true);
           setIsDemoMode(false);
-          web3Service.getBalance(accounts[0]).then((bal) => setMonBalance(bal));
+          svc.getBalance(accounts[0]).then((bal) => setMonBalance(bal));
         }
       };
 
@@ -170,7 +172,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         win.ethereum.removeListener?.("chainChanged", handleChainChanged);
       };
     }
-  }, [web3Service]);
+  }, []);
 
   const activateDemoMode = useCallback(() => {
     setWalletConnected(true);

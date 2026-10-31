@@ -7,13 +7,15 @@
   ],
   "scripts": {
     "dev": "npm run dev --prefix apps/web --",
-    "build": "npm run build --prefix apps/web",
-    "start": "npm run start --prefix apps/web --",
+    "build": "cd apps/web && npm run build",
+    "start": "node server.js",
+    "start:next": "npm run start --prefix apps/web --",
     "lint": "npm run lint --prefix apps/web",
     "typecheck": "npm run typecheck --prefix apps/web",
     "keep-alive": "npm run keep-alive --prefix apps/web"
   },
   "dependencies": {
+    "express": "^4.21.2",
     "next": "14.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

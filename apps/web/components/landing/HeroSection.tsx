@@ -235,7 +235,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 alt="Monad Hunt M Logo"
                 fill
                 sizes="80px"
-                priority
                 className="object-contain"
               />
             </div>

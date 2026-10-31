@@ -77,7 +77,6 @@ export const Navbar: React.FC = () => {
               alt="M"
               fill
               sizes="44px"
-              priority
               className="object-contain rounded-sm"
             />
           </div>
