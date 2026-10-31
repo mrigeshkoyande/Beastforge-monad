@@ -26,7 +26,10 @@ export default function HomePage() {
   } = useGame();
 
   const handleEnterCity = () => {
-    router.push("/app");
+    const el = document.getElementById("protocol") || document.getElementById("landing-sections");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -73,7 +76,7 @@ export default function HomePage() {
             else if (tab === "profile") router.push("/profile");
             else if (tab === "leaderboard") router.push("/leaderboards");
             else if (tab === "tv") router.push("/hunt-tv");
-            else router.push("/app");
+            else router.push("/");
           }}
           onSelectBeast={(b) => {
             setPlayerBeast(b);

@@ -81,7 +81,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 2: HOW THE CITY LEAGUE WORKS                                     */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="protocol" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12 border-b border-[#1E273D] pb-6">
           <div>
             <div className="text-xs font-mono font-bold text-[#E63946] uppercase tracking-widest flex items-center gap-2">
@@ -138,7 +138,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 3: THE CITY IS THE BATTLEFIELD (MUMBAI TERRITORIES)              */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="territories" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-[#1E273D] pb-6">
           <div>
             <div className="text-xs font-mono font-bold text-[#457B9D] uppercase tracking-widest flex items-center gap-2">
@@ -234,7 +234,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 4: LIVE ARENAS (ESPORTS MATCHUPS)                                 */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="arenas" className="relative">
         <div className="bg-gradient-to-r from-[#101522] via-[#0B0F17] to-[#101522] border border-[#E63946]/40 rounded-2xl p-6 sm:p-10 relative overflow-hidden shadow-[0_0_40px_rgba(230,57,70,0.15)]">
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 blur-[100px] pointer-events-none" />
 
@@ -325,7 +325,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 5: CHOOSE YOUR BEAST                                              */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="beasts" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-[#1E273D] pb-6">
           <div>
             <div className="text-xs font-mono font-bold text-[#F4D35E] uppercase tracking-widest flex items-center gap-2">
@@ -421,7 +421,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 6: CHOOSE YOUR CREW (4 FACTIONS)                                 */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="crews" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-[#1E273D] pb-6">
           <div>
             <div className="text-xs font-mono font-bold text-[#E63946] uppercase tracking-widest flex items-center gap-2">
@@ -483,7 +483,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 7: SEASON 01 — MUMBAI CONQUEST                                   */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="seasons" className="relative">
         <div className="bg-[#0A0E17] border border-[#1E273D] rounded-2xl p-8 sm:p-12 relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
@@ -553,7 +553,7 @@ export const LandingSections: React.FC<LandingSectionsProps> = ({
       {/* ========================================================================= */}
       {/* SECTION 8: HUNT TV (BATTLE HIGHLIGHTS)                                    */}
       {/* ========================================================================= */}
-      <section className="relative">
+      <section id="hunt-tv" className="relative">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-[#1E273D] pb-6">
           <div>
             <div className="text-xs font-mono font-bold text-[#E63946] uppercase tracking-widest flex items-center gap-2">
