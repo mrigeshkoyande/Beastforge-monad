@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: monad-hunt-web
+    runtime: node
+    rootDir: apps/web
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_MONAD_CHAIN_ID
+        value: "10143"
+      - key: NEXT_PUBLIC_MONAD_RPC_URL
+        value: https://testnet-rpc.monad.xyz/
+      - key: NEXT_PUBLIC_MONAD_EXPLORER_URL
+        value: https://testnet.monadexplorer.com
+      - key: NEXT_PUBLIC_HUNT_CORE_ADDRESS
+        value: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+      - key: NEXT_PUBLIC_BEAST_NFT_ADDRESS
+        value: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      - key: NEXT_PUBLIC_RESOLVER_ADDRESS
+        value: "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+
