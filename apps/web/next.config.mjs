@@ -1,6 +1,23 @@
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// In the npm-workspaces monorepo, dependencies (including `next`) are hoisted
+// to the repo-root node_modules. Next 14 otherwise picks the nearest lockfile
+// (apps/web) as the tracing root and leaves `next` out of the server bundle,
+// which crashes serverless deploys. Docker builds copy apps/web alone, so
+// there is no monorepo root there and the default is kept.
+const monorepoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const outputFileTracingRoot = existsSync(resolve(monorepoRoot, "package.json"))
+  ? monorepoRoot
+  : undefined;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    outputFileTracingRoot,
+  },
   output:
     process.env.NEXT_STANDALONE === "true" ||
     process.env.OUTPUT_STANDALONE === "true"
