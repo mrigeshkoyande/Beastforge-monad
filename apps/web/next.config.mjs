@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  output:
+    process.env.NEXT_STANDALONE === "true" ||
+    process.env.OUTPUT_STANDALONE === "true"
+      ? "standalone"
+      : undefined,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [],
@@ -30,6 +34,15 @@ const nextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/app",
+        destination: "/",
+        permanent: false,
       },
     ];
   },
