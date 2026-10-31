@@ -156,7 +156,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="text-left font-mono">
             <div className="text-[9px] text-[#455070] uppercase tracking-[0.2em] font-bold">YOUR BEAST</div>
             <div className="text-xs font-bold text-white uppercase group-hover:text-[#F4D35E] transition-colors">
-              {playerBeast?.name ?? "NEON VIPERS"}
+              {playerBeast?.name ?? "EMBERWYRM"}
             </div>
             <div className="text-[10px] text-[#E63946] font-bold">Lv. {playerBeast?.level ?? 36}</div>
           </div>
@@ -177,7 +177,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 onClick={() => { soundFX.playClick(); onSelectTerritoryZone(m.id); }}
                 onMouseEnter={() => setActiveHoveredZone(m.id)}
                 onMouseLeave={() => setActiveHoveredZone(null)}
-                className="hud-marker pointer-events-auto hidden lg:flex flex-col items-center"
+                className="hud-marker pointer-events-auto hidden md:flex flex-col items-center origin-top-left transform scale-75 md:scale-90 lg:scale-100 transition-transform"
               >
                 {/* Radar ring for live / attack zones */}
                 {(m.isLive || m.isPulse) && (
@@ -213,7 +213,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           })}
 
           {/* Mumbai watermark bottom-right */}
-          <div className="absolute bottom-24 right-6 hidden lg:flex items-center gap-2">
+          <div className="absolute bottom-24 right-6 hidden md:flex items-center gap-2">
             <Crosshair className="w-4 h-4 text-[#E63946] animate-spin" style={{ animationDuration: "14s" }} />
             <div className="text-right font-mono">
               <div className="text-xs font-bold text-white/60 tracking-[0.35em] uppercase">MUMBAI</div>
@@ -248,7 +248,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   MONAD
                 </span>
                 <span
-                  className="text-[#E63946] italic drop-shadow-[0_0_20px_rgba(230,57,70,0.7)]"
+                  className="text-[#E63946] drop-shadow-[0_0_20px_rgba(230,57,70,0.7)]"
                   style={{ fontSize: "clamp(2.8rem, 6.5vw, 5.5rem)", display: "block", lineHeight: 0.95 }}
                 >
                   HUNT
@@ -264,8 +264,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Slogan */}
           <p className="font-display italic font-bold text-lg sm:text-2xl lg:text-3xl uppercase tracking-wide text-white mb-3">
-            Catch. Stake. Battle.{" "}
-            <span className="text-[#E63946] drop-shadow-[0_0_10px_rgba(230,57,70,0.8)]">Conquer.</span>
+            CATCH. STAKE. BATTLE.{" "}
+            <span className="text-[#E63946] drop-shadow-[0_0_10px_rgba(230,57,70,0.8)]">CONQUER.</span>
           </p>
 
           {/* Description */}
@@ -307,19 +307,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Stats Row */}
           <div className="flex items-stretch divide-x divide-[#1E273D] border border-[#1E273D] rounded-xl overflow-hidden bg-[#06090F]/85 backdrop-blur-md w-fit shadow-xl">
             {[
-              { icon: Flame, value: "24 DAYS", label: "SEASON REMAINING", color: "#E63946" },
-              { icon: Swords, value: "1,420", label: "TOTAL BATTLES", color: "#FFFFFF" },
-              { icon: Users, value: "488", label: "ACTIVE HUNTERS", color: "#00E676" },
-              { icon: Trophy, value: "#1", label: "TOP CREW", color: "#F4D35E" },
-            ].map(({ icon: Icon, value, label, color }) => (
+              { icon: Flame, value: "24 DAYS", label: "SEASON REMAINING", color: "#E63946", isTopCrew: false },
+              { icon: Swords, value: "1,420", label: "TOTAL BATTLES", color: "#FFFFFF", isTopCrew: false },
+              { icon: Users, value: "488", label: "ACTIVE HUNTERS", color: "#00E676", isTopCrew: false },
+              { icon: Trophy, value: "#1", label: "TOP CREW", color: "#F4D35E", isTopCrew: true },
+            ].map(({ icon: Icon, value, label, color, isTopCrew }) => (
               <div key={label} className="px-4 py-3 font-mono">
                 <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color }}>
                   <Icon className="w-3.5 h-3.5" />
                   <span>{value}</span>
                 </div>
-                <div className="text-[9px] text-[#3D5070] uppercase tracking-wider mt-0.5 font-bold whitespace-nowrap">
-                  {label}
-                </div>
+                {isTopCrew ? (
+                  <div className="mt-0.5">
+                    <span className="bg-[#E63946] text-white px-1.5 py-0.5 rounded text-[8px] font-mono font-extrabold tracking-wider uppercase inline-block">
+                      TOP CREW
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-[9px] text-[#3D5070] uppercase tracking-wider mt-0.5 font-bold whitespace-nowrap">
+                    {label}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -330,15 +338,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="relative z-20 w-full border-t border-[#1A2438] bg-[#040608]/95 backdrop-blur-xl py-3 px-4 sm:px-8 lg:px-12">
         <div className="max-w-[1600px] mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
           {[
-            { icon: Sparkles, label: "AI BEASTS", sub: "Collect & Evolve", color: "#E63946", bg: "rgba(230,57,70,0.12)", border: "rgba(230,57,70,0.3)" },
-            { icon: Swords, label: "LIVE ARENAS", sub: "Real Players. Real Battles.", color: "#E63946", bg: "rgba(230,57,70,0.12)", border: "rgba(230,57,70,0.3)" },
-            { icon: Shield, label: "TERRITORIES", sub: "Fight for Control", color: "#457B9D", bg: "rgba(69,123,157,0.12)", border: "rgba(69,123,157,0.3)" },
-            { icon: Users, label: "CREWS", sub: "Build Together", color: "#F4D35E", bg: "rgba(244,211,94,0.12)", border: "rgba(244,211,94,0.3)" },
-            { icon: Target, label: "SEASONS", sub: "Compete & Rise", color: "#00E676", bg: "rgba(0,230,118,0.12)", border: "rgba(0,230,118,0.3)" },
-          ].map(({ icon: Icon, label, sub, color, bg, border }, i) => (
+            { id: "beasts", icon: Sparkles, label: "AI BEASTS", sub: "Collect & Evolve", color: "#E63946", bg: "rgba(230,57,70,0.12)", border: "rgba(230,57,70,0.3)" },
+            { id: "arenas", icon: Swords, label: "LIVE ARENAS", sub: "Real Players. Real Battles.", color: "#E63946", bg: "rgba(230,57,70,0.12)", border: "rgba(230,57,70,0.3)" },
+            { id: "territories", icon: Shield, label: "TERRITORIES", sub: "Fight for Control", color: "#457B9D", bg: "rgba(69,123,157,0.12)", border: "rgba(69,123,157,0.3)" },
+            { id: "crews", icon: Users, label: "CREWS", sub: "Build Together", color: "#F4D35E", bg: "rgba(244,211,94,0.12)", border: "rgba(244,211,94,0.3)" },
+            { id: "seasons", icon: Target, label: "SEASONS", sub: "Compete & Rise", color: "#00E676", bg: "rgba(0,230,118,0.12)", border: "rgba(0,230,118,0.3)" },
+          ].map(({ id, icon: Icon, label, sub, color, bg, border }, i) => (
             <div
               key={label}
-              onClick={() => { soundFX.playClick(); onEnterCity(); }}
+              onClick={() => {
+                soundFX.playClick();
+                const el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+                else onEnterCity();
+              }}
               className={`flex items-center gap-2.5 p-2 rounded-lg hover:bg-[#0D1220] transition-colors cursor-pointer ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}
             >
               <div
